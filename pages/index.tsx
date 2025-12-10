@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Header from '../components/Header';
 import SwapCard from '../components/SwapCard';
-import RealTimeChart from '../components/RealTimeChart';
+import TradingViewChart from '../components/TradingViewChart';
 import GeminiDrawer from '../components/GeminiDrawer';
 import { Token } from '../types';
 import { TOKENS } from '../constants';
@@ -42,8 +42,8 @@ const Home: React.FC = () => {
   return (
     <>
       <Head>
-        <title>Uniswap Clone</title>
-        <meta name="description" content="A Uniswap clone built with Next.js" />
+        <title>EternTS</title>
+        <meta name="description" content="A EternTS clone built with Next.js" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -84,7 +84,7 @@ const Home: React.FC = () => {
                         ? 'bg-slate-900/50 border border-slate-800/50' 
                         : 'bg-white/70 border border-gray-200/50 shadow-lg'
                     }`}>
-                       <RealTimeChart token={chartToken} />
+                       <TradingViewChart token={chartToken} />
                     </div>
 
                     {/* Right Side: Swap Interface */}
@@ -100,7 +100,7 @@ const Home: React.FC = () => {
                       <div className={`mt-8 text-sm max-w-[400px] text-center transition-colors ${
                         theme === 'dark' ? 'text-slate-500' : 'text-gray-600'
                       }`}>
-                          <p>Uniswap is available on Ethereum, Polygon, Optimism, Arbitrum, Celo, BNB Chain, Avalanche, and Base.</p>
+                          <p>EternTS is available on Ethereum, Polygon, Optimism, Arbitrum, Celo, BNB Chain, Avalanche, and Base.</p>
                       </div>
                     </div>
                  </div>
@@ -112,7 +112,7 @@ const Home: React.FC = () => {
                       ? 'bg-slate-900/80 border border-slate-800' 
                       : 'bg-white/80 border border-gray-200 shadow-lg'
                   }`}>
-                       <RealTimeChart token={chartToken} />
+                       <TradingViewChart token={chartToken} />
                        <div className={`p-6 border-t transition-colors ${
                          theme === 'dark' ? 'border-slate-800' : 'border-gray-200'
                        }`}>
