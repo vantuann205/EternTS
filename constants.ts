@@ -39,22 +39,40 @@ export const TOKENS: Token[] = [
     change24h: 4.1
   },
   {
-    symbol: 'DAI',
-    name: 'Dai Stablecoin',
-    address: '0x6b175474e89094c44da98b954eedeac495271d0f',
+    symbol: 'LINK',
+    name: 'Chainlink',
+    address: '0x514910771af9ca656af840dff83e8264ecf986ca',
     decimals: 18,
-    logoURI: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo.png',
-    price: 1.00,
-    change24h: 0.0
+    logoURI: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x514910771AF9Ca656af840dff83E8264EcF986CA/logo.png',
+    price: 14.25,
+    change24h: 3.2
   },
   {
-    symbol: 'PEPE',
-    name: 'Pepe',
-    address: '0x6982508145454ce325ddbe47a25d4ec3d2311933',
+    symbol: 'AAVE',
+    name: 'Aave',
+    address: '0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9',
     decimals: 18,
-    logoURI: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6982508145454Ce325dDbE47a25d4ec3d2311933/logo.png',
-    price: 0.0000072,
-    change24h: 15.4
+    logoURI: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9/logo.png',
+    price: 95.40,
+    change24h: -0.8
+  },
+  {
+    symbol: 'COMP',
+    name: 'Compound',
+    address: '0xc00e94cb662c3520282e6f5717214004a7f26888',
+    decimals: 18,
+    logoURI: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xc00e94Cb662C3520282E6f5717214004A7f26888/logo.png',
+    price: 58.30,
+    change24h: 1.5
+  },
+  {
+    symbol: 'MKR',
+    name: 'Maker',
+    address: '0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2',
+    decimals: 18,
+    logoURI: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2/logo.png',
+    price: 1420.50,
+    change24h: 2.1
   }
 ];
 
