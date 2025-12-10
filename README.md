@@ -26,17 +26,12 @@ EtherTS is a next-generation DEX that combines the power of decentralized financ
    npm install
    ```
 
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key:
-   ```
-   GEMINI_API_KEY=your_api_key_here
-   ```
-
-3. Run the development server:
+2. Run the development server:
    ```bash
    npm run dev
    ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+3. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## Build for Production
 
