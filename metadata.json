@@ -1,0 +1,5 @@
+{
+  "name": "Uniswap Clone",
+  "description": "A high-fidelity clone of the Uniswap interface featuring token swapping, real-time market insights powered by Gemini, and interactive charts.",
+  "requestFramePermissions": []
+}
