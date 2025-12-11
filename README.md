@@ -1,65 +1,117 @@
+# CardanoSwap - Cardano DEX Trading Platform
 
-# EtherTS - Decentralized Exchange Platform
+A modern, responsive Cardano DEX interface built with Next.js, TypeScript, Tailwind CSS, and MeshSDK for native Cardano wallet integration.
 
-EtherTS is a cutting-edge decentralized exchange (DEX) platform built for seamless cryptocurrency trading. Experience the future of DeFi with our intuitive interface, advanced analytics, and AI-powered insights.
+## Features
 
-## What is EtherTS?
+- 🎨 Modern, responsive design with dark/light theme support
+- 💱 Swap interface for Cardano native tokens
+- 🔗 Native Cardano wallet integration with MeshSDK
+- 💰 Real-time wallet balance and address display
+- 📊 Real-time price charts (TradingView integration)
+- 🌐 Multi-language support (English, Vietnamese, Chinese)
+- 📱 Mobile-responsive design
+- ⚡ Fast performance with Next.js
+- 🏪 Trading modes: Swap, Limit Orders, Buy, Sell
+- 🎯 15 Cardano ecosystem tokens with authentic logos
 
-EtherTS is a next-generation DEX that combines the power of decentralized finance with modern web technologies. Our platform enables users to swap tokens, explore market trends, and make informed trading decisions with the help of artificial intelligence.
+## Cardano Ecosystem Tokens
 
-## Key Features
+The platform supports 15 major Cardano ecosystem tokens:
+- **ADA** - Cardano native token
+- **AGIX** - SingularityNET
+- **DJED** - Djed stablecoin
+- **SHEN** - Shen reserve token
+- **MIN** - Minswap DEX token
+- **SUNDAE** - SundaeSwap DEX token
+- **WMT** - World Mobile Token
+- **HOSKY** - Hosky meme token
+- **MILK** - MuesliSwap token
+- **CLAY** - Clay Nation NFT token
+- **VYFI** - VyFinance DeFi token
+- **COPI** - Cornucopias gaming token
+- **HUNT** - Hunt token
+- **BOOK** - BOOK token
+- **NEWM** - NEWM music token
 
-- **Seamless Token Swapping** - Trade cryptocurrencies with minimal slippage and competitive rates
-- **Real-time Market Analytics** - Interactive charts and live price data for informed trading
-- **AI-Powered Insights** - Get intelligent token analysis powered by Google Gemini AI
-- **Multi-Chain Support** - Trade across Ethereum, Polygon, Arbitrum, and more
-- **Mobile-First Design** - Fully responsive interface optimized for all devices
-- **Lightning Fast** - Built with Next.js for optimal performance and user experience
-- **Secure & Trustless** - Non-custodial trading with your wallet always in control
+## Wallet Integration
 
-## Run Locally
+- **MeshSDK Integration**: Native Cardano wallet support
+- **Multi-Wallet Support**: Compatible with Nami, Eternl, Flint, and other Cardano wallets
+- **Balance Display**: Real-time ADA balance in wallet dropdown
+- **Address Management**: Full wallet address display with copy functionality
+- **Secure Connection**: Safe wallet connection and disconnection
 
-**Prerequisites:** Node.js 16+ and npm
+## Tech Stack
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-2. Run the development server:
-   ```bash
-   npm run dev
-   ```
-
-3. Open [http://localhost:3000](http://localhost:3000) in your browser
-
-## Build for Production
-
-```bash
-npm run build
-npm start
-```
-
-## Technology Stack
-
-EtherTS is built with modern, battle-tested technologies:
-
-- **Frontend Framework:** Next.js 14 - For server-side rendering and optimal performance
-- **Language:** TypeScript - Type-safe development for reliability
-- **Styling:** Tailwind CSS - Utility-first CSS for rapid UI development
-- **Charts & Analytics:** Recharts - Interactive and responsive data visualization
-- **Icons:** Lucide React - Beautiful, customizable icons
-- **AI Integration:** Google Gemini API - Advanced AI for market analysis
-- **Blockchain Integration:** Web3 compatible for seamless wallet connections
-
-## Why Choose EtherTS?
-
-- **User-Centric Design:** Intuitive interface designed for both beginners and advanced traders
-- **Advanced Analytics:** Make data-driven decisions with comprehensive market insights
-- **AI-Enhanced Trading:** Leverage artificial intelligence for smarter trading strategies
-- **Community-Driven:** Built by traders, for traders, with continuous community feedback
-- **Open Source:** Transparent, auditable code that you can trust
+- **Framework**: Next.js 14
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Wallet Integration**: MeshSDK (@meshsdk/core, @meshsdk/react)
+- **Charts**: TradingView Widget
+- **Icons**: Lucide React
+- **Blockchain**: Cardano
 
 ## Getting Started
 
-Ready to experience the future of decentralized trading? Follow the setup instructions below to run EtherTS locally.
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Run the development server:
+```bash
+npm run dev
+```
+
+3. Open [http://localhost:3001](http://localhost:3001) in your browser.
+
+4. Install a Cardano wallet (Nami, Eternl, or Flint) to test wallet connectivity.
+
+## Project Structure
+
+```
+├── components/          # React components
+│   ├── Header.tsx      # Navigation header with wallet integration
+│   ├── SwapCard.tsx    # Main swap interface
+│   ├── LimitOrderCard.tsx # Limit order interface
+│   ├── BuyCard.tsx     # Fiat to crypto interface
+│   ├── SellCard.tsx    # Crypto to fiat interface
+│   ├── TokenModal.tsx  # Cardano token selection modal
+│   └── TradingViewChart.tsx # Chart component
+├── contexts/           # React contexts
+│   ├── ThemeContext.tsx    # Theme management
+│   ├── LanguageContext.tsx # Language management
+│   └── CardanoWalletContext.tsx # Cardano wallet state management
+├── pages/              # Next.js pages
+├── styles/             # Global styles
+├── types.ts            # TypeScript type definitions
+└── constants.ts        # Cardano token definitions
+```
+
+## Wallet Connection Flow
+
+1. Click "Connect Wallet" button
+2. System detects available Cardano wallets
+3. User approves connection in wallet extension
+4. Wallet address and balance are displayed
+5. User can copy address and view balance in dropdown
+6. Disconnect option available in wallet dropdown
+
+## Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+
+## Development Notes
+
+- The wallet integration currently uses a simulation for development
+- In production, uncomment the actual MeshSDK implementation in `CardanoWalletContext.tsx`
+- Token prices are mock data - integrate with real Cardano DEX APIs for production
+- Charts show placeholder data - integrate with real price feeds for production
+
+## License
+
+MIT

@@ -6,18 +6,19 @@ import LimitOrderCard from '../components/LimitOrderCard';
 import BuyCard from '../components/BuyCard';
 import SellCard from '../components/SellCard';
 import TradingViewChart from '../components/TradingViewChart';
+import LoadingAnimation from '../components/LoadingAnimation';
 
 import { Token } from '../types';
 import { TOKENS } from '../constants';
 import { useTheme } from '../contexts/ThemeContext';
-
-
+import { useCardanoWallet } from '../contexts/CardanoWalletContext';
 
 const Home: React.FC = () => {
   const { theme } = useTheme();
+  const { connected: isWalletConnected, connectWallet } = useCardanoWallet();
   const [activeTab, setActiveTab] = useState('Swap');
-  const [isWalletConnected, setIsWalletConnected] = useState(false);
-
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [showContent, setShowContent] = useState(false);
 
   // We keep a "primary" token for the chart view if user is in "Explore" mode, 
   // or use the input token from swap to show chart side-by-side on desktop.
@@ -30,17 +31,23 @@ const Home: React.FC = () => {
     document.documentElement.classList.add(theme);
   }, [theme]);
 
-  const handleConnectWallet = () => {
-    setIsWalletConnected(!isWalletConnected);
-  };
+  // Simulate initial app loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitialLoading(false);
+      // Show content with a slight delay for smooth transition
+      setTimeout(() => setShowContent(true), 200);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
 
 
   return (
     <>
       <Head>
-        <title>EternTS - DEX Trading Platform</title>
-        <meta name="description" content="EternTS - Professional DEX trading platform with real-time TradingView charts" />
+        <title>EternTS - Cardano DEX Trading Platform</title>
+        <meta name="description" content="EternTS - Professional Cardano DEX trading platform with real-time charts and native ADA wallet integration" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" href="/favicon.ico" />
@@ -51,6 +58,16 @@ const Home: React.FC = () => {
           ? 'bg-slate-950 text-white' 
           : 'bg-gradient-to-br from-slate-50 to-gray-100 text-slate-900'
       }`}>
+        
+        {/* Initial Loading Screen */}
+        {isInitialLoading && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-white animate-fadeOut">
+            <div className="text-center">
+              <LoadingAnimation size={150} message="" />
+              <p className="text-black font-medium text-lg mt-4">Loading...</p>
+            </div>
+          </div>
+        )}
         {/* Ambient background effects */}
         <div className="fixed top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
             <div className={`absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full blur-[120px] animate-pulse ${
@@ -68,12 +85,13 @@ const Home: React.FC = () => {
         <div className="relative z-10 flex flex-col min-h-screen">
             <Header 
               activeTab={activeTab} 
-              setActiveTab={setActiveTab} 
-              isWalletConnected={isWalletConnected}
-              onConnectWallet={handleConnectWallet}
+              setActiveTab={setActiveTab}
+              showContent={showContent}
             />
 
-            <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8">
+            <main className={`flex-1 flex flex-col items-center justify-center p-4 md:p-8 transition-all duration-1000 ${
+              showContent ? 'animate-slideInUp animate-delay-300' : 'opacity-0 translate-y-full'
+            }`}>
               {activeTab === 'Swap' && (
                  <div className="w-full max-w-7xl flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-12">
                     {/* Left Side: Chart (Visible on Large Screens for "Pro" feel) */}
@@ -86,26 +104,28 @@ const Home: React.FC = () => {
                     </div>
 
                     {/* Right Side: Swap Interface */}
-                    <div className="flex flex-col items-center justify-center w-full lg:flex-1 lg:max-w-md">
+                    <div className="flex flex-col w-full lg:flex-1 lg:max-w-md">
                       <SwapCard 
                           isWalletConnected={isWalletConnected}
-                          onConnect={handleConnectWallet}
+                          onConnect={connectWallet}
                           onTokenChange={setChartToken}
+                          activeTab={activeTab}
+                          setActiveTab={setActiveTab}
                       />
                       
                       {/* Helper text */}
                       <div className={`mt-8 text-sm max-w-[400px] text-center transition-colors ${
                         theme === 'dark' ? 'text-slate-500' : 'text-gray-600'
                       }`}>
-                          <p>EternTS is available on Ethereum, Polygon, Optimism, Arbitrum, Celo, BNB Chain, Avalanche, and Base.</p>
+                          <p>EternTS - Trade Cardano native tokens with seamless wallet integration and real-time charts.</p>
                       </div>
                     </div>
                  </div>
               )}
 
               {activeTab === 'Limit' && (
-                 <div className="w-full max-w-6xl flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-12">
-                    {/* Left Side: Chart */}
+                 <div className="w-full max-w-7xl flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-12">
+                    {/* Left Side: Chart (Visible on Large Screens for "Pro" feel) */}
                     <div className={`hidden lg:block flex-[2] w-full max-w-4xl rounded-3xl overflow-hidden backdrop-blur-sm h-[600px] transition-all duration-300 ${
                       theme === 'dark' 
                         ? 'bg-slate-900/50 border border-slate-800/50' 
@@ -115,26 +135,28 @@ const Home: React.FC = () => {
                     </div>
 
                     {/* Right Side: Limit Order Interface */}
-                    <div className="flex flex-col items-center justify-center w-full lg:flex-1 lg:max-w-md">
+                    <div className="flex flex-col w-full lg:flex-1 lg:max-w-md">
                       <LimitOrderCard 
                           isWalletConnected={isWalletConnected}
-                          onConnect={handleConnectWallet}
+                          onConnect={connectWallet}
                           onTokenChange={setChartToken}
+                          activeTab={activeTab}
+                          setActiveTab={setActiveTab}
                       />
                       
                       {/* Helper text */}
                       <div className={`mt-8 text-sm max-w-[400px] text-center transition-colors ${
                         theme === 'dark' ? 'text-slate-500' : 'text-gray-600'
                       }`}>
-                          <p>Set limit orders to buy or sell at your target price automatically.</p>
+                          <p>Set limit orders for Cardano tokens at your target price automatically.</p>
                       </div>
                     </div>
                  </div>
               )}
 
               {activeTab === 'Buy' && (
-                 <div className="w-full max-w-6xl flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-12">
-                    {/* Left Side: Chart */}
+                 <div className="w-full max-w-7xl flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-12">
+                    {/* Left Side: Chart (Visible on Large Screens for "Pro" feel) */}
                     <div className={`hidden lg:block flex-[2] w-full max-w-4xl rounded-3xl overflow-hidden backdrop-blur-sm h-[600px] transition-all duration-300 ${
                       theme === 'dark' 
                         ? 'bg-slate-900/50 border border-slate-800/50' 
@@ -144,26 +166,28 @@ const Home: React.FC = () => {
                     </div>
 
                     {/* Right Side: Buy Interface */}
-                    <div className="flex flex-col items-center justify-center w-full lg:flex-1 lg:max-w-md">
+                    <div className="flex flex-col w-full lg:flex-1 lg:max-w-md">
                       <BuyCard 
                           isWalletConnected={isWalletConnected}
-                          onConnect={handleConnectWallet}
+                          onConnect={connectWallet}
                           onTokenChange={setChartToken}
+                          activeTab={activeTab}
+                          setActiveTab={setActiveTab}
                       />
                       
                       {/* Helper text */}
                       <div className={`mt-8 text-sm max-w-[400px] text-center transition-colors ${
                         theme === 'dark' ? 'text-slate-500' : 'text-gray-600'
                       }`}>
-                          <p>Buy crypto with credit card, debit card, or bank transfer.</p>
+                          <p>Buy Cardano tokens with credit card, debit card, or bank transfer.</p>
                       </div>
                     </div>
                  </div>
               )}
 
               {activeTab === 'Sell' && (
-                 <div className="w-full max-w-6xl flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-12">
-                    {/* Left Side: Chart */}
+                 <div className="w-full max-w-7xl flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-12">
+                    {/* Left Side: Chart (Visible on Large Screens for "Pro" feel) */}
                     <div className={`hidden lg:block flex-[2] w-full max-w-4xl rounded-3xl overflow-hidden backdrop-blur-sm h-[600px] transition-all duration-300 ${
                       theme === 'dark' 
                         ? 'bg-slate-900/50 border border-slate-800/50' 
@@ -173,18 +197,20 @@ const Home: React.FC = () => {
                     </div>
 
                     {/* Right Side: Sell Interface */}
-                    <div className="flex flex-col items-center justify-center w-full lg:flex-1 lg:max-w-md">
+                    <div className="flex flex-col w-full lg:flex-1 lg:max-w-md">
                       <SellCard 
                           isWalletConnected={isWalletConnected}
-                          onConnect={handleConnectWallet}
+                          onConnect={connectWallet}
                           onTokenChange={setChartToken}
+                          activeTab={activeTab}
+                          setActiveTab={setActiveTab}
                       />
                       
                       {/* Helper text */}
                       <div className={`mt-8 text-sm max-w-[400px] text-center transition-colors ${
                         theme === 'dark' ? 'text-slate-500' : 'text-gray-600'
                       }`}>
-                          <p>Sell your crypto and withdraw to your bank account or PayPal.</p>
+                          <p>Sell your Cardano tokens and withdraw to your bank account or PayPal.</p>
                       </div>
                     </div>
                  </div>
@@ -240,6 +266,19 @@ const Home: React.FC = () => {
               )}
 
 
+               {activeTab === 'NFTs' && (
+                   <div className={`text-center mt-20 ${
+                     theme === 'dark' ? 'text-slate-500' : 'text-gray-600'
+                   }`}>
+                       <h2 className={`text-2xl font-bold mb-2 ${
+                         theme === 'dark' ? 'text-white' : 'text-gray-900'
+                       }`}>NFTs</h2>
+                       <p>Explore and trade NFT collections.</p>
+                       <button className="mt-6 px-6 py-3 bg-pink-500 text-white rounded-xl font-medium hover:bg-pink-600 transition-colors shadow-lg">
+                           Browse Collections
+                       </button>
+                   </div>
+               )}
                
                {activeTab === 'Pool' && (
                    <div className={`text-center mt-20 ${

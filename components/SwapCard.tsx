@@ -4,15 +4,20 @@ import { Token, SwapState } from '../types';
 import TokenModal from './TokenModal';
 import { TOKENS } from '../constants';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import LoadingAnimation from './LoadingAnimation';
 
 interface SwapCardProps {
   isWalletConnected: boolean;
   onConnect: () => void;
   onTokenChange?: (token: Token) => void; // Add this to notify parent about token changes
+  activeTab?: string;
+  setActiveTab?: (tab: string) => void;
 }
 
-const SwapCard: React.FC<SwapCardProps> = ({ isWalletConnected, onConnect, onTokenChange }) => {
+const SwapCard: React.FC<SwapCardProps> = ({ isWalletConnected, onConnect, onTokenChange, activeTab, setActiveTab }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [swapState, setSwapState] = useState<SwapState>({
     inputToken: TOKENS[0], // ETH
     outputToken: TOKENS[1], // USDC
@@ -22,6 +27,7 @@ const SwapCard: React.FC<SwapCardProps> = ({ isWalletConnected, onConnect, onTok
 
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
   const [selectingSide, setSelectingSide] = useState<'input' | 'output'>('input');
+  const [isSwapping, setIsSwapping] = useState(false);
   
   // Notify parent when input token changes (for chart)
   useEffect(() => {
@@ -93,10 +99,38 @@ const SwapCard: React.FC<SwapCardProps> = ({ isWalletConnected, onConnect, onTok
     }`}>
       <div className="flex justify-between items-center p-4 mb-2">
         <div className={`flex gap-4 font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-          <button className="opacity-100 hover:opacity-80 transition-opacity">Swap</button>
-          <button className="opacity-50 hover:opacity-100 transition-opacity">Limit</button>
-          <button className="opacity-50 hover:opacity-100 transition-opacity">Send</button>
-          <button className="opacity-50 hover:opacity-100 transition-opacity">Buy</button>
+          <button 
+            onClick={() => setActiveTab && setActiveTab('Swap')}
+            className={`transition-opacity ${
+              activeTab === 'Swap' ? 'opacity-100' : 'opacity-50 hover:opacity-100'
+            }`}
+          >
+            {t('swap')}
+          </button>
+          <button 
+            onClick={() => setActiveTab && setActiveTab('Limit')}
+            className={`transition-opacity ${
+              activeTab === 'Limit' ? 'opacity-100' : 'opacity-50 hover:opacity-100'
+            }`}
+          >
+            {t('limit')}
+          </button>
+          <button 
+            onClick={() => setActiveTab && setActiveTab('Buy')}
+            className={`transition-opacity ${
+              activeTab === 'Buy' ? 'opacity-100' : 'opacity-50 hover:opacity-100'
+            }`}
+          >
+            {t('buy')}
+          </button>
+          <button 
+            onClick={() => setActiveTab && setActiveTab('Sell')}
+            className={`transition-opacity ${
+              activeTab === 'Sell' ? 'opacity-100' : 'opacity-50 hover:opacity-100'
+            }`}
+          >
+            {t('sell')}
+          </button>
         </div>
         <button className={`transition-colors ${
           theme === 'dark' 
@@ -227,14 +261,28 @@ const SwapCard: React.FC<SwapCardProps> = ({ isWalletConnected, onConnect, onTok
       </div>
 
       <button 
-        onClick={onConnect}
+        onClick={() => {
+          if (isWalletConnected) {
+            setIsSwapping(true);
+            // Simulate swap transaction
+            setTimeout(() => setIsSwapping(false), 3000);
+          } else {
+            onConnect();
+          }
+        }}
+        disabled={isSwapping}
         className={`w-full mt-2 font-semibold text-xl py-4 rounded-2xl transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed ${
           theme === 'dark' 
             ? 'bg-pink-500/10 text-pink-500 hover:bg-pink-500/20' 
             : 'bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200'
         }`}
       >
-        {isWalletConnected ? 'Swap' : 'Connect Wallet'}
+        {isSwapping ? (
+          <div className="flex items-center justify-center gap-2">
+            <LoadingAnimation size={24} message="" />
+            <span>Loading...</span>
+          </div>
+        ) : isWalletConnected ? 'Swap' : 'Connect Wallet'}
       </button>
       
       {isWalletConnected && swapState.inputAmount && (

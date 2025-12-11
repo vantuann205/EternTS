@@ -1,20 +1,54 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, MoreHorizontal, Menu, Sun, Moon, Globe, ChevronDown } from 'lucide-react';
+import { Search, MoreHorizontal, Menu, Sun, Moon, Globe, ChevronDown, Copy } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useCardanoWallet } from '../contexts/CardanoWalletContext';
+import WalletModal from './WalletModal';
 
 interface HeaderProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  onConnectWallet: () => void;
-  isWalletConnected: boolean;
+  showContent?: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onConnectWallet, isWalletConnected }) => {
+const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, showContent = true }) => {
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
+  const { 
+    connected, 
+    connecting, 
+    address, 
+    fullAddress,
+    balance, 
+    showWalletModal,
+    availableWallets,
+    connectWallet, 
+    selectWallet,
+    disconnectWallet, 
+    copyAddress,
+    closeWalletModal
+  } = useCardanoWallet();
   const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
+  const [isWalletDropdownOpen, setIsWalletDropdownOpen] = useState(false);
+  const [isTradingDropdownOpen, setIsTradingDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const tradingDropdownRef = useRef<HTMLDivElement>(null);
+  const walletDropdownRef = useRef<HTMLDivElement>(null);
+  const tradingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Handle trading dropdown with delay
+  const handleTradingMouseEnter = () => {
+    if (tradingTimeoutRef.current) {
+      clearTimeout(tradingTimeoutRef.current);
+    }
+    setIsTradingDropdownOpen(true);
+  };
+
+  const handleTradingMouseLeave = () => {
+    tradingTimeoutRef.current = setTimeout(() => {
+      setIsTradingDropdownOpen(false);
+    }, 300); // 300ms delay
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -22,21 +56,35 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onConnectWalle
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsLanguageDropdownOpen(false);
       }
+      if (tradingDropdownRef.current && !tradingDropdownRef.current.contains(event.target as Node)) {
+        setIsTradingDropdownOpen(false);
+      }
+      if (walletDropdownRef.current && !walletDropdownRef.current.contains(event.target as Node)) {
+        setIsWalletDropdownOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      if (tradingTimeoutRef.current) {
+        clearTimeout(tradingTimeoutRef.current);
+      }
     };
   }, []);
   
   const navItems = [
+    { key: 'Trading', label: t('trading'), hasDropdown: true },
+    { key: 'NFTs', label: 'NFTs' },
+    { key: 'Pool', label: t('pool') },
+    { key: 'Explore', label: t('explore') }
+  ];
+
+  const tradingItems = [
     { key: 'Swap', label: t('swap') },
-    { key: 'Limit', label: 'Limit' },
-    { key: 'Buy', label: 'Buy' },
-    { key: 'Sell', label: 'Sell' },
-    { key: 'Explore', label: t('explore') },
-    { key: 'Pool', label: t('pool') }
+    { key: 'Limit', label: t('limit') },
+    { key: 'Buy', label: t('buy') },
+    { key: 'Sell', label: t('sell') }
   ];
 
   const languages = [
@@ -47,7 +95,9 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onConnectWalle
 
   return (
     <header className="flex items-center justify-between px-4 py-4 md:px-6 z-50 relative">
-      <div className="flex items-center gap-8">
+      <div className={`flex items-center gap-8 transition-all duration-1000 ${
+        showContent ? 'animate-slideInLeft' : 'opacity-0 -translate-x-full'
+      }`}>
         {/* Logo Area */}
         <div className="flex items-center text-pink-500 cursor-pointer">
            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-pink-500">
@@ -62,26 +112,92 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onConnectWalle
             : 'bg-white/90 border-gray-300/70 shadow-lg'
         }`}>
           {navItems.map((item) => (
-            <button
-              key={item.key}
-              onClick={() => setActiveTab(item.key)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                activeTab === item.key
-                  ? theme === 'dark' 
-                    ? 'bg-slate-700 text-white' 
-                    : 'bg-gray-800 text-white shadow-md'
-                  : theme === 'dark'
-                    ? 'text-slate-400 hover:text-slate-200'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-              }`}
-            >
-              {item.label}
-            </button>
+            <div key={item.key} className="relative" ref={item.key === 'Trading' ? tradingDropdownRef : undefined}>
+              {item.hasDropdown ? (
+                <div
+                  onMouseEnter={handleTradingMouseEnter}
+                  onMouseLeave={handleTradingMouseLeave}
+                  className="relative"
+                >
+                  <button
+                    className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors flex items-center gap-1 ${
+                      ['Swap', 'Limit', 'Buy', 'Sell'].includes(activeTab)
+                        ? theme === 'dark' 
+                          ? 'bg-slate-700 text-white' 
+                          : 'bg-gray-800 text-white shadow-md'
+                        : theme === 'dark'
+                          ? 'text-slate-400 hover:text-slate-200'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                    }`}
+                  >
+                    {item.label}
+                    <ChevronDown size={14} />
+                  </button>
+                  
+                  {isTradingDropdownOpen && (
+                    <div 
+                      className="absolute top-full left-0 pt-2 pb-2"
+                      onMouseEnter={handleTradingMouseEnter}
+                      onMouseLeave={handleTradingMouseLeave}
+                    >
+                      {/* Invisible bridge to connect button and dropdown */}
+                      <div className="h-2 w-full"></div>
+                      
+                      <div className={`rounded-xl shadow-lg z-50 min-w-[120px] border ${
+                        theme === 'dark' 
+                          ? 'bg-slate-900 border-slate-700' 
+                          : 'bg-white border-gray-200 shadow-xl'
+                      }`}>
+                        {tradingItems.map((tradingItem) => (
+                          <button
+                            key={tradingItem.key}
+                            onClick={() => {
+                              setActiveTab(tradingItem.key);
+                              setIsTradingDropdownOpen(false);
+                            }}
+                            className={`w-full text-left px-4 py-2 text-sm transition-colors first:rounded-t-xl last:rounded-b-xl ${
+                              theme === 'dark' 
+                                ? 'hover:bg-slate-800' 
+                                : 'hover:bg-gray-50'
+                            } ${
+                              activeTab === tradingItem.key 
+                                ? 'text-pink-500' 
+                                : theme === 'dark' 
+                                  ? 'text-slate-300' 
+                                  : 'text-gray-700'
+                            }`}
+                          >
+                            {tradingItem.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={() => setActiveTab(item.key)}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    activeTab === item.key
+                      ? theme === 'dark' 
+                        ? 'bg-slate-700 text-white' 
+                        : 'bg-gray-800 text-white shadow-md'
+                      : theme === 'dark'
+                        ? 'text-slate-400 hover:text-slate-200'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  {item.label}
+                </button>
+              )}
+            </div>
           ))}
         </nav>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className={`flex items-center gap-3 transition-all duration-1000 ${
+        showContent ? 'animate-slideInRight' : 'opacity-0 translate-x-full'
+      }`}>
         {/* Search Bar */}
         <div className={`hidden lg:flex items-center rounded-xl px-3 py-2 w-64 md:w-80 gap-2 transition-all duration-300 ${
           theme === 'dark' 
@@ -172,36 +288,108 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onConnectWalle
           )}
         </button>
 
-        {/* Network Selector (Visual only) */}
+        {/* Network Selector (Cardano) */}
         <div className={`hidden md:flex items-center gap-2 cursor-pointer p-2 rounded-xl transition-colors ${
           theme === 'dark' 
             ? 'hover:bg-slate-800' 
             : 'hover:bg-gray-100'
         }`}>
-            <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-[10px] text-white font-bold">E</div>
+          <img 
+            src="https://assets.coingecko.com/coins/images/975/large/cardano.png" 
+            alt="Cardano" 
+            className="w-5 h-5 rounded-full"
+          />
         </div>
 
         {/* Wallet Button */}
-        <button
-          onClick={onConnectWallet}
-          className={`px-4 py-2 rounded-2xl font-semibold text-sm transition-all ${
-            isWalletConnected
-              ? theme === 'dark'
-                ? 'bg-slate-800 text-white border border-slate-700 hover:border-slate-600'
-                : 'bg-gray-800 text-white border border-gray-600 hover:border-gray-500 shadow-md'
-              : theme === 'dark'
-                ? 'bg-pink-500/10 text-pink-500 hover:bg-pink-500/20'
-                : 'bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 hover:border-pink-300'
-          }`}
-        >
-          {isWalletConnected ? '0x12...3456' : t('connect')}
-        </button>
+        <div className="relative" ref={walletDropdownRef}>
+          <button
+            onClick={connected ? () => setIsWalletDropdownOpen(!isWalletDropdownOpen) : connectWallet}
+            disabled={connecting}
+            className={`px-4 py-2 rounded-2xl font-semibold text-sm transition-all ${
+              connected
+                ? theme === 'dark'
+                  ? 'bg-slate-800 text-white border border-slate-700 hover:border-slate-600'
+                  : 'bg-gray-800 text-white border border-gray-600 hover:border-gray-500 shadow-md'
+                : theme === 'dark'
+                  ? 'bg-pink-500/10 text-pink-500 hover:bg-pink-500/20'
+                  : 'bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200 hover:border-pink-300'
+            } ${connecting ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {connecting ? 'Connecting...' : connected ? `${address.slice(0, 6)}...${address.slice(-4)}` : t('connect')}
+          </button>
+          
+          {connected && isWalletDropdownOpen && (
+            <div className={`absolute right-0 top-full mt-2 rounded-xl shadow-lg z-50 min-w-[220px] border ${
+              theme === 'dark' 
+                ? 'bg-slate-900 border-slate-700' 
+                : 'bg-white border-gray-200 shadow-xl'
+            }`}>
+              <div className="p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-xs font-medium ${
+                    theme === 'dark' ? 'text-slate-400' : 'text-gray-600'
+                  }`}>Địa chỉ ví</span>
+                  <button
+                    onClick={copyAddress}
+                    className={`p-1 rounded-lg transition-colors ${
+                      theme === 'dark' 
+                        ? 'hover:bg-slate-800 text-slate-400 hover:text-white' 
+                        : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
+                    }`}
+                    title="Sao chép địa chỉ"
+                  >
+                    <Copy size={14} />
+                  </button>
+                </div>
+                <div className={`text-xs font-mono mb-3 p-2 rounded-lg ${
+                  theme === 'dark' 
+                    ? 'bg-slate-800 text-slate-300' 
+                    : 'bg-gray-100 text-gray-700'
+                }`}>
+                  {fullAddress ? `${fullAddress.slice(0, 8)}...${fullAddress.slice(-6)}` : ''}
+                </div>
+                
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-xs font-medium ${
+                    theme === 'dark' ? 'text-slate-400' : 'text-gray-600'
+                  }`}>Số dư</span>
+                </div>
+                <div className={`text-sm font-semibold mb-3 ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  {balance} ADA
+                </div>
+                
+                <button
+                  onClick={disconnectWallet}
+                  className={`w-full py-2 px-3 rounded-lg text-xs font-medium transition-colors ${
+                    theme === 'dark'
+                      ? 'bg-red-500/10 text-red-400 hover:bg-red-500/20'
+                      : 'bg-red-50 text-red-600 hover:bg-red-100'
+                  }`}
+                >
+                  Ngắt kết nối
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
         
         {/* Mobile Menu Toggle */}
         <button className={`md:hidden p-2 ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}`}>
             <Menu size={24} />
         </button>
       </div>
+
+      {/* Wallet Selection Modal */}
+      <WalletModal
+        isOpen={showWalletModal}
+        onClose={closeWalletModal}
+        onSelectWallet={selectWallet}
+        availableWallets={availableWallets}
+        connecting={connecting}
+      />
     </header>
   );
 };

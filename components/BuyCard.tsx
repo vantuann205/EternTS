@@ -4,20 +4,26 @@ import { Token } from '../types';
 import TokenModal from './TokenModal';
 import { TOKENS } from '../constants';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import LoadingAnimation from './LoadingAnimation';
 
 interface BuyCardProps {
   isWalletConnected: boolean;
   onConnect: () => void;
   onTokenChange?: (token: Token) => void;
+  activeTab?: string;
+  setActiveTab?: (tab: string) => void;
 }
 
-const BuyCard: React.FC<BuyCardProps> = ({ isWalletConnected, onConnect, onTokenChange }) => {
+const BuyCard: React.FC<BuyCardProps> = ({ isWalletConnected, onConnect, onTokenChange, activeTab, setActiveTab }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [selectedToken, setSelectedToken] = useState<Token>(TOKENS[0]); // ETH
   const [fiatAmount, setFiatAmount] = useState('');
   const [tokenAmount, setTokenAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
+  const [isBuying, setIsBuying] = useState(false);
 
   const handleTokenSelect = (token: Token) => {
     setSelectedToken(token);
@@ -45,30 +51,53 @@ const BuyCard: React.FC<BuyCardProps> = ({ isWalletConnected, onConnect, onToken
   ];
 
   return (
-    <div className={`w-full max-w-md mx-auto rounded-3xl p-6 backdrop-blur-md transition-all duration-300 ${
+    <div className={`w-full max-w-[480px] md:rounded-3xl p-2 relative shadow-xl border transition-all duration-300 ${
       theme === 'dark' 
-        ? 'bg-slate-900/80 border border-slate-800' 
-        : 'bg-white/90 border border-gray-200 shadow-xl'
+        ? 'bg-slate-900 border-slate-800' 
+        : 'bg-white border-gray-200 shadow-2xl'
     }`}>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <CreditCard className="text-green-500" size={20} />
-          <h2 className={`text-xl font-semibold ${
-            theme === 'dark' ? 'text-white' : 'text-gray-900'
-          }`}>Buy Crypto</h2>
+      {/* Header Tabs */}
+      <div className="flex justify-between items-center p-4 mb-2">
+        <div className={`flex gap-4 font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          <button 
+            onClick={() => setActiveTab && setActiveTab('Swap')}
+            className={`transition-opacity ${
+              activeTab === 'Swap' ? 'opacity-100' : 'opacity-50 hover:opacity-100'
+            }`}
+          >
+            {t('swap')}
+          </button>
+          <button 
+            onClick={() => setActiveTab && setActiveTab('Limit')}
+            className={`transition-opacity ${
+              activeTab === 'Limit' ? 'opacity-100' : 'opacity-50 hover:opacity-100'
+            }`}
+          >
+            {t('limit')}
+          </button>
+          <button className={`opacity-100`}>
+            {t('buy')}
+          </button>
+          <button 
+            onClick={() => setActiveTab && setActiveTab('Sell')}
+            className={`transition-opacity ${
+              activeTab === 'Sell' ? 'opacity-100' : 'opacity-50 hover:opacity-100'
+            }`}
+          >
+            {t('sell')}
+          </button>
         </div>
-        <button className={`p-2 rounded-xl transition-colors ${
+        <button className={`transition-colors ${
           theme === 'dark' 
-            ? 'hover:bg-slate-800 text-slate-400 hover:text-white' 
-            : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
+            ? 'text-slate-400 hover:text-white' 
+            : 'text-gray-500 hover:text-gray-700'
         }`}>
           <Settings size={20} />
         </button>
       </div>
 
       {/* Fiat Amount */}
-      <div className={`rounded-2xl p-4 mb-4 transition-all duration-200 ${
+      <div className={`rounded-2xl p-4 mb-4 mx-4 transition-all duration-200 ${
         theme === 'dark' 
           ? 'bg-slate-800/50 border border-slate-700/50' 
           : 'bg-gray-50 border border-gray-200'
@@ -94,34 +123,31 @@ const BuyCard: React.FC<BuyCardProps> = ({ isWalletConnected, onConnect, onToken
           </div>
         </div>
         
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className={`text-2xl font-medium ${
-              theme === 'dark' ? 'text-white' : 'text-gray-900'
-            }`}>$</span>
-            <input
-              type="text"
-              placeholder="0"
-              value={fiatAmount}
-              onChange={(e) => handleFiatAmountChange(e.target.value)}
-              className={`text-3xl font-medium bg-transparent border-none outline-none flex-1 ${
-                theme === 'dark' ? 'text-white placeholder-slate-600' : 'text-gray-900 placeholder-gray-400'
-              }`}
-            />
-          </div>
+        <div className="flex justify-between items-center">
+          <input
+            type="text"
+            placeholder="0"
+            value={fiatAmount}
+            onChange={(e) => handleFiatAmountChange(e.target.value)}
+            className={`bg-transparent text-4xl outline-none w-full font-medium ${
+              theme === 'dark' ? 'text-white placeholder-slate-500' : 'text-gray-900 placeholder-gray-400'
+            }`}
+          />
           
-          <div className={`text-sm font-medium px-3 py-1 rounded-lg ${
+          <button className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all shrink-0 ml-4 ${
             theme === 'dark' 
-              ? 'bg-slate-700 text-slate-300' 
-              : 'bg-gray-200 text-gray-700'
+              ? 'bg-slate-700 hover:bg-slate-600' 
+              : 'bg-gray-200 hover:bg-gray-300'
           }`}>
-            USD
-          </div>
+            <span className={`font-bold text-lg ${
+              theme === 'dark' ? 'text-white' : 'text-gray-900'
+            }`}>USD</span>
+          </button>
         </div>
       </div>
 
       {/* Token Amount */}
-      <div className={`rounded-2xl p-4 mb-4 transition-all duration-200 ${
+      <div className={`rounded-2xl p-4 mb-4 mx-4 transition-all duration-200 ${
         theme === 'dark' 
           ? 'bg-slate-800/50 border border-slate-700/50' 
           : 'bg-gray-50 border border-gray-200'
@@ -141,8 +167,8 @@ const BuyCard: React.FC<BuyCardProps> = ({ isWalletConnected, onConnect, onToken
             placeholder="0"
             value={tokenAmount}
             readOnly
-            className={`text-3xl font-medium bg-transparent border-none outline-none w-full ${
-              theme === 'dark' ? 'text-white placeholder-slate-600' : 'text-gray-900 placeholder-gray-400'
+            className={`bg-transparent text-4xl outline-none w-full font-medium cursor-default ${
+              theme === 'dark' ? 'text-white placeholder-slate-500' : 'text-gray-900 placeholder-gray-400'
             }`}
           />
           
@@ -164,7 +190,7 @@ const BuyCard: React.FC<BuyCardProps> = ({ isWalletConnected, onConnect, onToken
       </div>
 
       {/* Payment Method */}
-      <div className={`rounded-2xl p-4 mb-4 ${
+      <div className={`rounded-2xl p-4 mb-4 mx-4 ${
         theme === 'dark' 
           ? 'bg-slate-800/50 border border-slate-700/50' 
           : 'bg-gray-50 border border-gray-200'
@@ -201,20 +227,35 @@ const BuyCard: React.FC<BuyCardProps> = ({ isWalletConnected, onConnect, onToken
       </div>
 
       {/* Buy Button */}
-      <button 
-        onClick={onConnect}
-        disabled={!fiatAmount || parseFloat(fiatAmount) <= 0}
-        className={`w-full font-semibold text-xl py-4 rounded-2xl transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed ${
+      <div className="mx-4">
+        <button 
+          onClick={() => {
+            if (isWalletConnected) {
+              setIsBuying(true);
+              // Simulate buy transaction
+              setTimeout(() => setIsBuying(false), 4000);
+            } else {
+              onConnect();
+            }
+          }}
+          disabled={!fiatAmount || parseFloat(fiatAmount) <= 0 || isBuying}
+          className={`w-full mt-2 font-semibold text-xl py-4 rounded-2xl transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed ${
           theme === 'dark' 
             ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20 border border-green-500/20' 
             : 'bg-green-500 text-white hover:bg-green-600 shadow-lg'
         }`}
-      >
-        {isWalletConnected ? `Buy ${selectedToken.symbol}` : 'Connect Wallet'}
-      </button>
+        >
+          {isBuying ? (
+            <div className="flex items-center justify-center gap-2">
+              <LoadingAnimation size={24} message="" />
+              <span>Loading...</span>
+            </div>
+          ) : isWalletConnected ? `Buy ${selectedToken.symbol}` : 'Connect Wallet'}
+        </button>
+      </div>
       
       {fiatAmount && parseFloat(fiatAmount) > 0 && (
-        <div className={`mt-4 p-3 rounded-xl ${
+        <div className={`mt-4 p-3 rounded-xl mx-4 ${
           theme === 'dark' 
             ? 'bg-slate-800/50 border border-slate-700/50' 
             : 'bg-gray-50 border border-gray-200'

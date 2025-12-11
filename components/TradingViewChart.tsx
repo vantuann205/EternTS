@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Token } from '../types';
 import { useTheme } from '../contexts/ThemeContext';
+import LoadingAnimation from './LoadingAnimation';
 
 // TradingView symbol mapping
 const TRADINGVIEW_SYMBOLS: { [symbol: string]: string } = {
@@ -158,10 +159,7 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({ token }) => {
       {/* Loading State */}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center z-10">
-          <div className={`text-center ${theme === 'dark' ? 'text-slate-400' : 'text-gray-500'}`}>
-            <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p>Loading TradingView Chart...</p>
-          </div>
+          <LoadingAnimation size={100} message="Loading..." />
         </div>
       )}
 

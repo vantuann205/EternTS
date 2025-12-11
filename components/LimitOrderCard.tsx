@@ -4,15 +4,20 @@ import { Token, SwapState } from '../types';
 import TokenModal from './TokenModal';
 import { TOKENS } from '../constants';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
+import LoadingAnimation from './LoadingAnimation';
 
 interface LimitOrderCardProps {
   isWalletConnected: boolean;
   onConnect: () => void;
   onTokenChange?: (token: Token) => void;
+  activeTab?: string;
+  setActiveTab?: (tab: string) => void;
 }
 
-const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onConnect, onTokenChange }) => {
+const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onConnect, onTokenChange, activeTab, setActiveTab }) => {
   const { theme } = useTheme();
+  const { t } = useLanguage();
   const [swapState, setSwapState] = useState<SwapState>({
     inputToken: TOKENS[0], // ETH
     outputToken: TOKENS[1], // USDC
@@ -22,9 +27,10 @@ const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onCo
   
   const [limitPrice, setLimitPrice] = useState('3204.5');
   const [priceType, setPriceType] = useState('market'); // 'market' or 'custom'
-  const [expiry, setExpiry] = useState('1 tuần');
+  const [expiry, setExpiry] = useState('week');
   const [isInputModalOpen, setIsInputModalOpen] = useState(false);
   const [isOutputModalOpen, setIsOutputModalOpen] = useState(false);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   const handleInputTokenSelect = (token: Token) => {
     setSwapState(prev => ({ ...prev, inputToken: token }));
@@ -48,32 +54,46 @@ const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onCo
   const currentPrice = (swapState.outputToken.price && swapState.inputToken.price) 
     ? swapState.outputToken.price / swapState.inputToken.price 
     : 0;
-  const priceImpact = limitPrice ? ((parseFloat(limitPrice) - currentPrice) / currentPrice * 100) : 0;
 
   return (
-    <div className={`w-full max-w-md mx-auto rounded-3xl p-6 backdrop-blur-md transition-all duration-300 ${
+    <div className={`w-full max-w-[480px] md:rounded-3xl p-2 relative shadow-xl border transition-all duration-300 ${
       theme === 'dark' 
-        ? 'bg-slate-900/80 border border-slate-800' 
-        : 'bg-white/90 border border-gray-200 shadow-xl'
+        ? 'bg-slate-900 border-slate-800' 
+        : 'bg-white border-gray-200 shadow-2xl'
     }`}>
       {/* Header Tabs */}
-      <div className="flex gap-4 font-medium mb-6">
-        <button className={`opacity-50 hover:opacity-100 transition-opacity ${
-          theme === 'dark' ? 'text-white' : 'text-gray-900'
-        }`}>Hoán đổi</button>
+      <div className="flex gap-4 font-medium mb-6 p-4">
+        <button 
+          onClick={() => setActiveTab && setActiveTab('Swap')}
+          className={`transition-opacity ${
+            activeTab === 'Swap' ? 'opacity-100' : 'opacity-50 hover:opacity-100'
+          } ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+        >
+          {t('swap')}
+        </button>
         <button className={`opacity-100 ${
           theme === 'dark' ? 'text-white' : 'text-gray-900'
-        }`}>Giới hạn</button>
-        <button className={`opacity-50 hover:opacity-100 transition-opacity ${
-          theme === 'dark' ? 'text-white' : 'text-gray-900'
-        }`}>Mua</button>
-        <button className={`opacity-50 hover:opacity-100 transition-opacity ${
-          theme === 'dark' ? 'text-white' : 'text-gray-900'
-        }`}>Bán</button>
+        }`}>{t('limit')}</button>
+        <button 
+          onClick={() => setActiveTab && setActiveTab('Buy')}
+          className={`transition-opacity ${
+            activeTab === 'Buy' ? 'opacity-100' : 'opacity-50 hover:opacity-100'
+          } ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+        >
+          {t('buy')}
+        </button>
+        <button 
+          onClick={() => setActiveTab && setActiveTab('Sell')}
+          className={`transition-opacity ${
+            activeTab === 'Sell' ? 'opacity-100' : 'opacity-50 hover:opacity-100'
+          } ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}
+        >
+          {t('sell')}
+        </button>
       </div>
 
       {/* Price Section */}
-      <div className={`p-4 rounded-2xl transition-colors border border-transparent mb-6 ${
+      <div className={`p-4 rounded-2xl transition-colors border border-transparent mb-6 mx-4 ${
         theme === 'dark' 
           ? 'bg-slate-800/50 hover:bg-slate-800/80 focus-within:border-slate-700' 
           : 'bg-gray-50 hover:bg-gray-100 focus-within:border-gray-300'
@@ -83,7 +103,7 @@ const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onCo
             <span className={`text-xs font-medium ${
               theme === 'dark' ? 'text-slate-400' : 'text-gray-600'
             }`}>
-              Khi 1
+              {t('when')}
             </span>
             <button 
               onClick={() => setIsInputModalOpen(true)}
@@ -101,7 +121,7 @@ const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onCo
             <span className={`text-xs font-medium ${
               theme === 'dark' ? 'text-slate-400' : 'text-gray-600'
             }`}>
-              có giá trị
+              {t('hasValue')}
             </span>
           </div>
           <button className={`p-2 rounded-lg transition-colors ${
@@ -158,7 +178,7 @@ const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onCo
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
             }`}
           >
-            Thị trường
+            {t('market')}
           </button>
           <button 
             onClick={() => {
@@ -207,14 +227,14 @@ const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onCo
       </div>
 
       {/* Sell Section */}
-      <div className={`p-4 rounded-2xl transition-colors border border-transparent mb-1 ${
+      <div className={`p-4 rounded-2xl transition-colors border border-transparent mb-1 mx-4 ${
         theme === 'dark' 
           ? 'bg-slate-800/50 hover:bg-slate-800/80 focus-within:border-slate-700' 
           : 'bg-gray-50 hover:bg-gray-100 focus-within:border-gray-300'
       }`}>
         <div className={`text-xs font-medium mb-3 ${
           theme === 'dark' ? 'text-slate-400' : 'text-gray-600'
-        }`}>Bán</div>
+        }`}>{t('youSell')}</div>
         
         <div className="flex justify-between items-center">
           <input
@@ -246,7 +266,7 @@ const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onCo
       </div>
 
       {/* Swap Arrow */}
-      <div className="flex justify-center py-2 mb-1">
+      <div className="flex justify-center py-2 mb-1 mx-4">
         <button 
           onClick={handleSwapTokens}
           className={`border-4 p-2 rounded-xl transition-all ${
@@ -260,14 +280,14 @@ const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onCo
       </div>
 
       {/* Buy Section */}
-      <div className={`p-4 rounded-2xl transition-colors border border-transparent ${
+      <div className={`p-4 rounded-2xl transition-colors border border-transparent mx-4 ${
         theme === 'dark' 
           ? 'bg-slate-800/50 hover:bg-slate-800/80 focus-within:border-slate-700' 
           : 'bg-gray-50 hover:bg-gray-100 focus-within:border-gray-300'
       }`}>
         <div className={`text-xs font-medium mb-3 ${
           theme === 'dark' ? 'text-slate-400' : 'text-gray-600'
-        }`}>Mua</div>
+        }`}>{t('youBuy')}</div>
         
         <div className="flex justify-between items-center">
           <input
@@ -299,20 +319,20 @@ const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onCo
       </div>
 
       {/* Expiry */}
-      <div className={`p-4 rounded-2xl transition-colors border border-transparent mb-4 ${
+      <div className={`p-4 rounded-2xl transition-colors border border-transparent mb-4 mx-4 ${
         theme === 'dark' 
           ? 'bg-slate-800/50 hover:bg-slate-800/80 focus-within:border-slate-700' 
           : 'bg-gray-50 hover:bg-gray-100 focus-within:border-gray-300'
       }`}>
         <div className={`text-xs font-medium mb-3 ${
           theme === 'dark' ? 'text-slate-400' : 'text-gray-600'
-        }`}>Hết hạn</div>
+        }`}>{t('expires')}</div>
         
         <div className="flex gap-2">
           <button 
-            onClick={() => setExpiry('1 ngày')}
+            onClick={() => setExpiry('day')}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
-              expiry === '1 ngày'
+              expiry === 'day'
                 ? theme === 'dark'
                   ? 'bg-slate-700 text-white'
                   : 'bg-gray-300 text-gray-900'
@@ -321,12 +341,12 @@ const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onCo
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
             }`}
           >
-            1 ngày
+            1 {t('day')}
           </button>
           <button 
-            onClick={() => setExpiry('1 tuần')}
+            onClick={() => setExpiry('week')}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
-              expiry === '1 tuần'
+              expiry === 'week'
                 ? theme === 'dark'
                   ? 'bg-slate-700 text-white'
                   : 'bg-gray-300 text-gray-900'
@@ -335,12 +355,12 @@ const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onCo
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
             }`}
           >
-            1 tuần
+            1 {t('week')}
           </button>
           <button 
-            onClick={() => setExpiry('1 tháng')}
+            onClick={() => setExpiry('month')}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
-              expiry === '1 tháng'
+              expiry === 'month'
                 ? theme === 'dark'
                   ? 'bg-slate-700 text-white'
                   : 'bg-gray-300 text-gray-900'
@@ -349,12 +369,12 @@ const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onCo
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
             }`}
           >
-            1 tháng
+            1 {t('month')}
           </button>
           <button 
-            onClick={() => setExpiry('1 năm')}
+            onClick={() => setExpiry('year')}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${
-              expiry === '1 năm'
+              expiry === 'year'
                 ? theme === 'dark'
                   ? 'bg-slate-700 text-white'
                   : 'bg-gray-300 text-gray-900'
@@ -363,22 +383,38 @@ const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onCo
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-200'
             }`}
           >
-            1 năm
+            1 {t('year')}
           </button>
         </div>
       </div>
 
       {/* Connect Wallet Button */}
-      <button 
-        onClick={onConnect}
-        className={`w-full font-semibold text-xl py-4 rounded-2xl transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed ${
+      <div className="mx-4">
+        <button 
+          onClick={() => {
+            if (isWalletConnected) {
+              setIsPlacingOrder(true);
+              // Simulate placing limit order
+              setTimeout(() => setIsPlacingOrder(false), 3000);
+            } else {
+              onConnect();
+            }
+          }}
+          disabled={isPlacingOrder}
+          className={`w-full mt-2 font-semibold text-xl py-4 rounded-2xl transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed ${
           theme === 'dark' 
             ? 'bg-pink-500/10 text-pink-500 hover:bg-pink-500/20 border border-pink-500/20' 
             : 'bg-pink-500 text-white hover:bg-pink-600 shadow-lg'
         }`}
-      >
-        {isWalletConnected ? 'Kết nối ví' : 'Kết nối ví'}
-      </button>
+        >
+          {isPlacingOrder ? (
+            <div className="flex items-center justify-center gap-2">
+              <LoadingAnimation size={24} message="" />
+              <span>Loading...</span>
+            </div>
+          ) : isWalletConnected ? 'Đặt lệnh giới hạn' : t('connect')}
+        </button>
+      </div>
       <TokenModal
         isOpen={isInputModalOpen}
         onClose={() => setIsInputModalOpen(false)}
