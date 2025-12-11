@@ -3,21 +3,18 @@ import Head from 'next/head';
 import Header from '../components/Header';
 import SwapCard from '../components/SwapCard';
 import TradingViewChart from '../components/TradingViewChart';
-import GeminiDrawer from '../components/GeminiDrawer';
+
 import { Token } from '../types';
 import { TOKENS } from '../constants';
 import { useTheme } from '../contexts/ThemeContext';
-import ApiStatus from '../components/ApiStatus';
-import DebugPanel from '../components/DebugPanel';
-import ChartTest from '../components/ChartTest';
+
 
 
 const Home: React.FC = () => {
   const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState('Swap');
   const [isWalletConnected, setIsWalletConnected] = useState(false);
-  const [insightToken, setInsightToken] = useState<Token | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
 
   // We keep a "primary" token for the chart view if user is in "Explore" mode, 
   // or use the input token from swap to show chart side-by-side on desktop.
@@ -34,17 +31,15 @@ const Home: React.FC = () => {
     setIsWalletConnected(!isWalletConnected);
   };
 
-  const handleTokenAnalysis = (token: Token) => {
-    setInsightToken(token);
-    setIsDrawerOpen(true);
-  };
+
 
   return (
     <>
       <Head>
-        <title>EternTS</title>
-        <meta name="description" content="A EternTS clone built with Next.js" />
+        <title>EternTS - DEX Trading Platform</title>
+        <meta name="description" content="EternTS - Professional DEX trading platform with real-time TradingView charts" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -77,9 +72,9 @@ const Home: React.FC = () => {
 
             <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8">
               {activeTab === 'Swap' && (
-                 <div className="w-full max-w-6xl flex flex-col lg:flex-row items-center lg:items-start justify-center gap-8 lg:gap-16">
+                 <div className="w-full max-w-7xl flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-12">
                     {/* Left Side: Chart (Visible on Large Screens for "Pro" feel) */}
-                    <div className={`hidden lg:block flex-1 w-full max-w-2xl rounded-3xl overflow-hidden backdrop-blur-sm h-[500px] transition-all duration-300 ${
+                    <div className={`hidden lg:block flex-[2] w-full max-w-4xl rounded-3xl overflow-hidden backdrop-blur-sm h-[600px] transition-all duration-300 ${
                       theme === 'dark' 
                         ? 'bg-slate-900/50 border border-slate-800/50' 
                         : 'bg-white/70 border border-gray-200/50 shadow-lg'
@@ -88,9 +83,8 @@ const Home: React.FC = () => {
                     </div>
 
                     {/* Right Side: Swap Interface */}
-                    <div className="flex flex-col items-center justify-center w-full lg:w-auto">
+                    <div className="flex flex-col items-center justify-center w-full lg:flex-1 lg:max-w-md">
                       <SwapCard 
-                          onTokenAnalysisRequest={handleTokenAnalysis}
                           isWalletConnected={isWalletConnected}
                           onConnect={handleConnectWallet}
                           onTokenChange={setChartToken}
@@ -107,7 +101,7 @@ const Home: React.FC = () => {
               )}
 
               {activeTab === 'Explore' && (
-                  <div className={`w-full max-w-5xl rounded-3xl overflow-hidden backdrop-blur-md p-4 transition-all duration-300 ${
+                  <div className={`w-full max-w-7xl rounded-3xl overflow-hidden backdrop-blur-md p-4 transition-all duration-300 ${
                     theme === 'dark' 
                       ? 'bg-slate-900/80 border border-slate-800' 
                       : 'bg-white/80 border border-gray-200 shadow-lg'
@@ -183,20 +177,9 @@ const Home: React.FC = () => {
             </main>
         </div>
 
-        <GeminiDrawer 
-          isOpen={isDrawerOpen} 
-          onClose={() => setIsDrawerOpen(false)} 
-          token={insightToken}
-        />
+
         
-        {/* API Status Indicator */}
-        <ApiStatus />
-        
-        {/* Debug Panel for testing API */}
-        <DebugPanel />
-        
-        {/* Chart Test */}
-        <ChartTest />
+
 
       </div>
     </>

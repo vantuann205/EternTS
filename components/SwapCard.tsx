@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, ChevronDown, ArrowDown, Info } from 'lucide-react';
+import { Settings, ChevronDown, ArrowDown } from 'lucide-react';
 import { Token, SwapState } from '../types';
 import TokenModal from './TokenModal';
 import { TOKENS } from '../constants';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface SwapCardProps {
-  onTokenAnalysisRequest: (token: Token) => void;
   isWalletConnected: boolean;
   onConnect: () => void;
   onTokenChange?: (token: Token) => void; // Add this to notify parent about token changes
 }
 
-const SwapCard: React.FC<SwapCardProps> = ({ onTokenAnalysisRequest, isWalletConnected, onConnect, onTokenChange }) => {
+const SwapCard: React.FC<SwapCardProps> = ({ isWalletConnected, onConnect, onTokenChange }) => {
   const { theme } = useTheme();
   const [swapState, setSwapState] = useState<SwapState>({
     inputToken: TOKENS[0], // ETH
@@ -84,10 +83,7 @@ const SwapCard: React.FC<SwapCardProps> = ({ onTokenAnalysisRequest, isWalletCon
     }));
   };
 
-  const handleAnalysisClick = (e: React.MouseEvent, token: Token) => {
-    e.stopPropagation();
-    onTokenAnalysisRequest(token);
-  };
+
 
   return (
     <div className={`w-full max-w-[480px] md:rounded-3xl p-2 relative shadow-xl border transition-all duration-300 ${
@@ -160,17 +156,7 @@ const SwapCard: React.FC<SwapCardProps> = ({ onTokenAnalysisRequest, isWalletCon
                     : ''}
             </div>
             <div className="flex items-center gap-2">
-                 <button 
-                    onClick={(e) => handleAnalysisClick(e, swapState.inputToken)}
-                    className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full transition-colors ${
-                      theme === 'dark' 
-                        ? 'text-pink-400 bg-pink-500/10 hover:bg-pink-500/20' 
-                        : 'text-pink-600 bg-pink-100 hover:bg-pink-200'
-                    }`}
-                 >
-                    <Info size={10} />
-                    <span>Gemini Analysis</span>
-                 </button>
+
                  <div className={`text-sm ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>Balance: 0</div>
             </div>
           </div>
@@ -233,17 +219,7 @@ const SwapCard: React.FC<SwapCardProps> = ({ onTokenAnalysisRequest, isWalletCon
                     : ''}
             </div>
              <div className="flex items-center gap-2">
-                 <button 
-                    onClick={(e) => handleAnalysisClick(e, swapState.outputToken)}
-                    className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full transition-colors ${
-                      theme === 'dark' 
-                        ? 'text-pink-400 bg-pink-500/10 hover:bg-pink-500/20' 
-                        : 'text-pink-600 bg-pink-100 hover:bg-pink-200'
-                    }`}
-                 >
-                    <Info size={10} />
-                    <span>Gemini Analysis</span>
-                 </button>
+
                 <div className={`text-sm ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>Balance: 0</div>
             </div>
           </div>

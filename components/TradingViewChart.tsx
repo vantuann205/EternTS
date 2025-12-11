@@ -130,7 +130,7 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({ token }) => {
   }
 
   return (
-    <div className={`w-full h-full min-h-[400px] flex flex-col transition-colors ${
+    <div className={`w-full h-full min-h-[500px] flex flex-col transition-colors ${
       theme === 'dark' ? 'bg-slate-950' : 'bg-white'
     }`}>
       {/* Header */}
@@ -171,7 +171,7 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({ token }) => {
           ref={containerRef}
           id={`tradingview-widget-${token.symbol}`}
           className="w-full h-full"
-          style={{ minHeight: '400px' }}
+          style={{ minHeight: '500px' }}
         />
       </div>
 
@@ -181,7 +181,7 @@ const TradingViewChart: React.FC<TradingViewChartProps> = ({ token }) => {
           ? 'border-slate-800 text-slate-500' 
           : 'border-gray-200 text-gray-500'
       }`}>
-        📺 Powered by TradingView • Real-time data from {TRADINGVIEW_SYMBOLS[token.symbol.toUpperCase()]?.split(':')[0] || 'Binance'}
+        Real-time data from {TRADINGVIEW_SYMBOLS[token.symbol.toUpperCase()]?.split(':')[0] || 'Binance'}
       </div>
     </div>
   );
