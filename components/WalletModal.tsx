@@ -59,6 +59,16 @@ const WalletModal: React.FC<WalletModalProps> = ({
           {connecting ? (
             <div className="py-8">
               <LoadingAnimation size={80} message="Loading..." />
+              <p className={`text-center text-sm mt-4 ${
+                theme === 'dark' ? 'text-slate-400' : 'text-gray-600'
+              }`}>
+                Connecting to wallet...
+              </p>
+              <p className={`text-center text-xs mt-2 ${
+                theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
+              }`}>
+                If connection fails, we'll automatically retry once
+              </p>
             </div>
           ) : availableWallets.length === 0 ? (
             <div className={`text-center py-8 ${

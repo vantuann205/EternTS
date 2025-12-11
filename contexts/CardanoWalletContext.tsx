@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { BrowserWallet } from '@meshsdk/core';
 import LoadingAnimation from '../components/LoadingAnimation';
+import ErrorModal from '../components/ErrorModal';
 
 interface WalletOption {
   name: string;
@@ -17,11 +18,14 @@ interface CardanoWalletContextType {
   balance: string;
   showWalletModal: boolean;
   availableWallets: WalletOption[];
+  showErrorModal: boolean;
+  errorMessage: string;
   connectWallet: () => void;
   selectWallet: (walletName: string) => Promise<void>;
   disconnectWallet: () => void;
   copyAddress: () => void;
   closeWalletModal: () => void;
+  closeErrorModal: () => void;
 }
 
 const CardanoWalletContext = createContext<CardanoWalletContextType | undefined>(undefined);
@@ -47,6 +51,9 @@ export const CardanoWalletProvider: React.FC<CardanoWalletProviderProps> = ({ ch
   const [balance, setBalance] = useState('0');
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [availableWallets, setAvailableWallets] = useState<WalletOption[]>([]);
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [retryCount, setRetryCount] = useState(0);
 
   // Friendly wallet display names
   const walletDisplayNames: Record<string, string> = {
@@ -81,7 +88,7 @@ export const CardanoWalletProvider: React.FC<CardanoWalletProviderProps> = ({ ch
     }
   };
 
-  const selectWallet = async (walletName: string) => {
+  const selectWallet = async (walletName: string, isRetry: boolean = false) => {
     try {
       setConnecting(true);
       
@@ -118,12 +125,34 @@ export const CardanoWalletProvider: React.FC<CardanoWalletProviderProps> = ({ ch
       
       setConnected(true);
       setShowWalletModal(false);
+      setRetryCount(0); // Reset retry count on success
+      setConnecting(false); // Success - stop connecting
       
     } catch (error) {
       console.error('Error connecting wallet:', error);
-      alert('Failed to connect wallet. Please make sure the wallet is unlocked and try again.');
-    } finally {
+      
+      // If this is the first attempt, try again
+      if (!isRetry && retryCount === 0) {
+        console.log('First attempt failed, retrying...');
+        setRetryCount(1);
+        // Don't set connecting to false here, keep loading during retry
+        setTimeout(() => {
+          selectWallet(walletName, true);
+        }, 1500);
+        return;
+      }
+      
+      // If retry also failed, show error modal
       setConnecting(false);
+      setShowWalletModal(false);
+      setRetryCount(0);
+      setErrorMessage(
+        `Failed to connect to ${walletDisplayNames[walletName] || walletName}. Please make sure:\n\n` +
+        `• Your wallet extension is installed and unlocked\n` +
+        `• You have granted permission to connect\n` +
+        `• Try refreshing the page and connecting again`
+      );
+      setShowErrorModal(true);
     }
   };
 
@@ -147,6 +176,11 @@ export const CardanoWalletProvider: React.FC<CardanoWalletProviderProps> = ({ ch
     setConnecting(false);
   };
 
+  const closeErrorModal = () => {
+    setShowErrorModal(false);
+    setErrorMessage('');
+  };
+
   // Format address for display (addr1...last4chars)
   const formatAddress = (addr: string) => {
     if (!addr) return '';
@@ -163,16 +197,27 @@ export const CardanoWalletProvider: React.FC<CardanoWalletProviderProps> = ({ ch
     balance,
     showWalletModal,
     availableWallets,
+    showErrorModal,
+    errorMessage,
     connectWallet,
     selectWallet,
     disconnectWallet,
     copyAddress,
-    closeWalletModal
+    closeWalletModal,
+    closeErrorModal
   };
 
   return (
     <CardanoWalletContext.Provider value={value}>
       {children}
+      
+      {/* Error Modal */}
+      <ErrorModal
+        isOpen={showErrorModal}
+        onClose={closeErrorModal}
+        title="Wallet Connection Failed"
+        message={errorMessage}
+      />
     </CardanoWalletContext.Provider>
   );
 };
