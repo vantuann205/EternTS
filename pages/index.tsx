@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Header from '../components/Header';
 import SwapCard from '../components/SwapCard';
+import LimitOrderCard from '../components/LimitOrderCard';
+import BuyCard from '../components/BuyCard';
+import SellCard from '../components/SellCard';
 import TradingViewChart from '../components/TradingViewChart';
 
 import { Token } from '../types';
@@ -100,6 +103,93 @@ const Home: React.FC = () => {
                  </div>
               )}
 
+              {activeTab === 'Limit' && (
+                 <div className="w-full max-w-6xl flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-12">
+                    {/* Left Side: Chart */}
+                    <div className={`hidden lg:block flex-[2] w-full max-w-4xl rounded-3xl overflow-hidden backdrop-blur-sm h-[600px] transition-all duration-300 ${
+                      theme === 'dark' 
+                        ? 'bg-slate-900/50 border border-slate-800/50' 
+                        : 'bg-white/70 border border-gray-200/50 shadow-lg'
+                    }`}>
+                       <TradingViewChart token={chartToken} />
+                    </div>
+
+                    {/* Right Side: Limit Order Interface */}
+                    <div className="flex flex-col items-center justify-center w-full lg:flex-1 lg:max-w-md">
+                      <LimitOrderCard 
+                          isWalletConnected={isWalletConnected}
+                          onConnect={handleConnectWallet}
+                          onTokenChange={setChartToken}
+                      />
+                      
+                      {/* Helper text */}
+                      <div className={`mt-8 text-sm max-w-[400px] text-center transition-colors ${
+                        theme === 'dark' ? 'text-slate-500' : 'text-gray-600'
+                      }`}>
+                          <p>Set limit orders to buy or sell at your target price automatically.</p>
+                      </div>
+                    </div>
+                 </div>
+              )}
+
+              {activeTab === 'Buy' && (
+                 <div className="w-full max-w-6xl flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-12">
+                    {/* Left Side: Chart */}
+                    <div className={`hidden lg:block flex-[2] w-full max-w-4xl rounded-3xl overflow-hidden backdrop-blur-sm h-[600px] transition-all duration-300 ${
+                      theme === 'dark' 
+                        ? 'bg-slate-900/50 border border-slate-800/50' 
+                        : 'bg-white/70 border border-gray-200/50 shadow-lg'
+                    }`}>
+                       <TradingViewChart token={chartToken} />
+                    </div>
+
+                    {/* Right Side: Buy Interface */}
+                    <div className="flex flex-col items-center justify-center w-full lg:flex-1 lg:max-w-md">
+                      <BuyCard 
+                          isWalletConnected={isWalletConnected}
+                          onConnect={handleConnectWallet}
+                          onTokenChange={setChartToken}
+                      />
+                      
+                      {/* Helper text */}
+                      <div className={`mt-8 text-sm max-w-[400px] text-center transition-colors ${
+                        theme === 'dark' ? 'text-slate-500' : 'text-gray-600'
+                      }`}>
+                          <p>Buy crypto with credit card, debit card, or bank transfer.</p>
+                      </div>
+                    </div>
+                 </div>
+              )}
+
+              {activeTab === 'Sell' && (
+                 <div className="w-full max-w-6xl flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-12">
+                    {/* Left Side: Chart */}
+                    <div className={`hidden lg:block flex-[2] w-full max-w-4xl rounded-3xl overflow-hidden backdrop-blur-sm h-[600px] transition-all duration-300 ${
+                      theme === 'dark' 
+                        ? 'bg-slate-900/50 border border-slate-800/50' 
+                        : 'bg-white/70 border border-gray-200/50 shadow-lg'
+                    }`}>
+                       <TradingViewChart token={chartToken} />
+                    </div>
+
+                    {/* Right Side: Sell Interface */}
+                    <div className="flex flex-col items-center justify-center w-full lg:flex-1 lg:max-w-md">
+                      <SellCard 
+                          isWalletConnected={isWalletConnected}
+                          onConnect={handleConnectWallet}
+                          onTokenChange={setChartToken}
+                      />
+                      
+                      {/* Helper text */}
+                      <div className={`mt-8 text-sm max-w-[400px] text-center transition-colors ${
+                        theme === 'dark' ? 'text-slate-500' : 'text-gray-600'
+                      }`}>
+                          <p>Sell your crypto and withdraw to your bank account or PayPal.</p>
+                      </div>
+                    </div>
+                 </div>
+              )}
+
               {activeTab === 'Explore' && (
                   <div className={`w-full max-w-7xl rounded-3xl overflow-hidden backdrop-blur-md p-4 transition-all duration-300 ${
                     theme === 'dark' 
@@ -149,16 +239,7 @@ const Home: React.FC = () => {
                   </div>
               )}
 
-               {activeTab === 'NFTs' && (
-                   <div className={`text-center mt-20 ${
-                     theme === 'dark' ? 'text-slate-500' : 'text-gray-600'
-                   }`}>
-                       <h2 className={`text-2xl font-bold mb-2 ${
-                         theme === 'dark' ? 'text-white' : 'text-gray-900'
-                       }`}>NFTs coming soon</h2>
-                       <p>Explore top collections across marketplaces.</p>
-                   </div>
-               )}
+
                
                {activeTab === 'Pool' && (
                    <div className={`text-center mt-20 ${

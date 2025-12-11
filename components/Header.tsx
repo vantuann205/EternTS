@@ -32,8 +32,10 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, onConnectWalle
   
   const navItems = [
     { key: 'Swap', label: t('swap') },
+    { key: 'Limit', label: 'Limit' },
+    { key: 'Buy', label: 'Buy' },
+    { key: 'Sell', label: 'Sell' },
     { key: 'Explore', label: t('explore') },
-    { key: 'NFTs', label: t('nfts') },
     { key: 'Pool', label: t('pool') }
   ];
 
