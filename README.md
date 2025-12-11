@@ -1,19 +1,19 @@
-# CardanoSwap - Cardano DEX Trading Platform
+# EternTS - Cardano DEX Trading Platform
 
 A modern, responsive Cardano DEX interface built with Next.js, TypeScript, Tailwind CSS, and MeshSDK for native Cardano wallet integration.
 
 ## Features
 
-- 🎨 Modern, responsive design with dark/light theme support
-- 💱 Swap interface for Cardano native tokens
-- 🔗 Native Cardano wallet integration with MeshSDK
-- 💰 Real-time wallet balance and address display
-- 📊 Real-time price charts (TradingView integration)
-- 🌐 Multi-language support (English, Vietnamese, Chinese)
-- 📱 Mobile-responsive design
-- ⚡ Fast performance with Next.js
-- 🏪 Trading modes: Swap, Limit Orders, Buy, Sell
-- 🎯 15 Cardano ecosystem tokens with authentic logos
+- Modern, responsive design with dark/light theme support
+- Swap interface for Cardano native tokens
+- Native Cardano wallet integration with MeshSDK
+- Real-time wallet balance and address display
+- Real-time price charts (TradingView integration)
+- Multi-language support (English, Vietnamese, Chinese)
+- Mobile-responsive design
+- Fast performance with Next.js
+- Trading modes: Swap, Limit Orders, Buy, Sell
+- 15 Cardano ecosystem tokens with authentic logos
 
 ## Cardano Ecosystem Tokens
 
@@ -34,13 +34,6 @@ The platform supports 15 major Cardano ecosystem tokens:
 - **BOOK** - BOOK token
 - **NEWM** - NEWM music token
 
-## Wallet Integration
-
-- **MeshSDK Integration**: Native Cardano wallet support
-- **Multi-Wallet Support**: Compatible with Nami, Eternl, Flint, and other Cardano wallets
-- **Balance Display**: Real-time ADA balance in wallet dropdown
-- **Address Management**: Full wallet address display with copy functionality
-- **Secure Connection**: Safe wallet connection and disconnection
 
 ## Tech Stack
 
@@ -64,30 +57,10 @@ npm install
 npm run dev
 ```
 
-3. Open [http://localhost:3001](http://localhost:3001) in your browser.
+3. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 4. Install a Cardano wallet (Nami, Eternl, or Flint) to test wallet connectivity.
 
-## Project Structure
-
-```
-├── components/          # React components
-│   ├── Header.tsx      # Navigation header with wallet integration
-│   ├── SwapCard.tsx    # Main swap interface
-│   ├── LimitOrderCard.tsx # Limit order interface
-│   ├── BuyCard.tsx     # Fiat to crypto interface
-│   ├── SellCard.tsx    # Crypto to fiat interface
-│   ├── TokenModal.tsx  # Cardano token selection modal
-│   └── TradingViewChart.tsx # Chart component
-├── contexts/           # React contexts
-│   ├── ThemeContext.tsx    # Theme management
-│   ├── LanguageContext.tsx # Language management
-│   └── CardanoWalletContext.tsx # Cardano wallet state management
-├── pages/              # Next.js pages
-├── styles/             # Global styles
-├── types.ts            # TypeScript type definitions
-└── constants.ts        # Cardano token definitions
-```
 
 ## Wallet Connection Flow
 
