@@ -59,7 +59,7 @@ npm run dev
 
 3. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-4. Install a Cardano wallet (Nami, Eternl, or Flint) to test wallet connectivity.
+4. Install a Cardano wallet (Nami, Eternl, or Flint) to test wallet connectivity
 
 
 ## Wallet Connection Flow
