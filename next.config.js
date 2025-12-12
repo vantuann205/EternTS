@@ -5,7 +5,16 @@ const nextConfig = {
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
   },
   images: {
-    domains: ['assets.coingecko.com', 'raw.githubusercontent.com'],
+    domains: ['assets.coingecko.com', 'raw.githubusercontent.com', 'lottie.host'],
+    unoptimized: true, // For better Vercel compatibility
+  },
+  eslint: {
+    // Allow production builds to successfully complete even if there are ESLint errors
+    ignoreDuringBuilds: false,
+  },
+  typescript: {
+    // Allow production builds to successfully complete even if there are type errors
+    ignoreBuildErrors: false,
   },
   webpack: (config, { isServer }) => {
     // Enable WebAssembly support

@@ -67,7 +67,7 @@ const WalletModal: React.FC<WalletModalProps> = ({
               <p className={`text-center text-xs mt-2 ${
                 theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
               }`}>
-                If connection fails, we'll automatically retry once
+                If connection fails, we&apos;ll automatically retry once
               </p>
             </div>
           ) : availableWallets.length === 0 ? (
