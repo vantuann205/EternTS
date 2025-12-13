@@ -13,7 +13,7 @@ A modern, responsive Cardano DEX interface built with Next.js, TypeScript, Tailw
 - Mobile-responsive design
 - Fast performance with Next.js
 - Trading modes: Swap, Limit Orders, Buy, Sell
-- 15 Cardano ecosystem tokens with authentic logos
+- 15 Cardano ecosystem tokens with authentic logos.
 
 ## Cardano Ecosystem Tokens
 

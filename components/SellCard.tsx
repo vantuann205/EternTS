@@ -175,7 +175,7 @@ const SellCard: React.FC<SellCardProps> = ({ isWalletConnected, onConnect, onTok
         </div>
         
         {/* Insufficient Balance Warning */}
-        {isWalletConnected && tokenAmount && parseFloat(tokenAmount) > parseFloat(getTokenBalance(selectedToken).replace(/,/g, '')) && (
+        {isWalletConnected && !!tokenAmount && parseFloat(tokenAmount) > parseFloat(getTokenBalance(selectedToken).replace(/,/g, '')) && (
           <div className="mt-2 text-sm text-red-500 flex items-center gap-1">
             <span>⚠️</span>
             <span>Insufficient {selectedToken.symbol} balance</span>
@@ -305,7 +305,7 @@ const SellCard: React.FC<SellCardProps> = ({ isWalletConnected, onConnect, onTok
               onConnect();
             }
           }}
-          disabled={!tokenAmount || parseFloat(tokenAmount) <= 0 || isSelling || (isWalletConnected && tokenAmount && parseFloat(tokenAmount) > parseFloat(getTokenBalance(selectedToken).replace(/,/g, '')))}
+          disabled={!tokenAmount || parseFloat(tokenAmount) <= 0 || isSelling || (isWalletConnected && !!tokenAmount && parseFloat(tokenAmount) > parseFloat(getTokenBalance(selectedToken).replace(/,/g, '')))}
           className={`w-full mt-2 font-semibold text-xl py-4 rounded-2xl transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed ${
           theme === 'dark' 
             ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20' 

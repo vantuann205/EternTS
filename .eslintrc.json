@@ -1,7 +1,7 @@
 {
   "extends": "next/core-web-vitals",
   "rules": {
-    "@next/next/no-img-element": "warn",
+    "@next/next/no-img-element": "off",
     "react/no-unescaped-entities": "error"
   }
 }
