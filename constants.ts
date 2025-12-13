@@ -136,6 +136,51 @@ export const TOKENS: Token[] = [
     logoURI: 'https://s2.coinmarketcap.com/static/img/coins/64x64/17160.png',
     price: 2.45,
     change24h: -3.2
+  },
+  {
+    symbol: 'USDM',
+    name: 'USDM',
+    address: 'usdm',
+    decimals: 6,
+    logoURI: 'https://cdn.prod.website-files.com/6152dfaed2ce58d94ef37b88/67123cae4998a4c8b7f9573f_Moneta-logo-alternate.png',
+    price: 1.00,
+    change24h: 0.81
+  },
+  {
+    symbol: 'C3',
+    name: 'Charli3',
+    address: 'c3',
+    decimals: 6,
+    logoURI: 'https://s2.coinmarketcap.com/static/img/coins/64x64/9991.png',
+    price: 0.02197,
+    change24h: 6.2
+  },
+  {
+    symbol: 'IUSD',
+    name: 'Indigo Dollar',
+    address: 'iusd',
+    decimals: 6,
+    logoURI: 'https://s2.coinmarketcap.com/static/img/coins/64x64/22989.png',
+    price: 1.02,
+    change24h: 0.86
+  },
+  {
+    symbol: 'LQ',
+    name: 'Liqwid Finance',
+    address: 'lq',
+    decimals: 6,
+    logoURI: 'https://s2.coinmarketcap.com/static/img/coins/64x64/18774.png',
+    price: 0.8133,
+    change24h: 5.78
+  },
+  {
+    symbol: 'CLARITY',
+    name: 'Clarity',
+    address: 'clarity',
+    decimals: 6,
+    logoURI: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3qrrRlyFU29Ruwzcms7YoIbfoQKgSxQPKOQ&s',
+    price: 0.0008009,
+    change24h: 0.0
   }
 ];
 

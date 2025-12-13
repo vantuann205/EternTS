@@ -5,6 +5,7 @@ import TokenModal from './TokenModal';
 import { TOKENS } from '../constants';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useCardanoWallet } from '../contexts/CardanoWalletContext';
 import LoadingAnimation from './LoadingAnimation';
 
 interface SwapCardProps {
@@ -18,6 +19,7 @@ interface SwapCardProps {
 const SwapCard: React.FC<SwapCardProps> = ({ isWalletConnected, onConnect, onTokenChange, activeTab, setActiveTab }) => {
   const { theme } = useTheme();
   const { t } = useLanguage();
+  const { balance } = useCardanoWallet();
   const [swapState, setSwapState] = useState<SwapState>({
     inputToken: TOKENS[0], // ETH
     outputToken: TOKENS[1], // USDC
@@ -28,6 +30,41 @@ const SwapCard: React.FC<SwapCardProps> = ({ isWalletConnected, onConnect, onTok
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
   const [selectingSide, setSelectingSide] = useState<'input' | 'output'>('input');
   const [isSwapping, setIsSwapping] = useState(false);
+
+  // Function to get token balance
+  const getTokenBalance = (token: Token) => {
+    if (!isWalletConnected) return '0';
+    
+    // For ADA (native Cardano token), use real balance
+    if (token.symbol === 'ADA') {
+      return balance;
+    }
+    
+    // For other tokens, simulate some balances
+    const mockBalances: { [symbol: string]: string } = {
+      'SNEK': '1,250,000',
+      'MIN': '850.50',
+      'SUNDAE': '2,450.00',
+      'AGIX': '125.8',
+      'INDY': '45.2',
+      'IAG': '320.5',
+      'NIGHT': '180.75',
+      'DJED': '500.00',
+      'SHEN': '1,200.0',
+      'WMT': '750.3',
+      'HOSKY': '50,000,000',
+      'MILK': '425.8',
+      'CLAY': '95.2',
+      'VYFI': '12.5',
+      'USDM': '800.00',
+      'C3': '2,150.0',
+      'IUSD': '650.50',
+      'LQ': '85.7',
+      'CLARITY': '15,000.0'
+    };
+    
+    return mockBalances[token.symbol] || '0';
+  };
   
   // Notify parent when input token changes (for chart)
   useEffect(() => {
@@ -190,8 +227,24 @@ const SwapCard: React.FC<SwapCardProps> = ({ isWalletConnected, onConnect, onTok
                     : ''}
             </div>
             <div className="flex items-center gap-2">
-
-                 <div className={`text-sm ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>Balance: 0</div>
+              <div className={`text-sm ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>
+                Balance: {getTokenBalance(swapState.inputToken)}
+              </div>
+              {isWalletConnected && (
+                <button
+                  onClick={() => {
+                    const maxBalance = getTokenBalance(swapState.inputToken);
+                    setSwapState(prev => ({ ...prev, inputAmount: maxBalance.replace(/,/g, '') }));
+                  }}
+                  className={`text-xs px-2 py-1 rounded-lg transition-colors ${
+                    theme === 'dark' 
+                      ? 'bg-slate-700 hover:bg-slate-600 text-slate-300' 
+                      : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                  }`}
+                >
+                  MAX
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -252,9 +305,10 @@ const SwapCard: React.FC<SwapCardProps> = ({ isWalletConnected, onConnect, onTok
                     ? `$${(parseFloat(swapState.outputAmount) * swapState.outputToken.price).toFixed(2)}` 
                     : ''}
             </div>
-             <div className="flex items-center gap-2">
-
-                <div className={`text-sm ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>Balance: 0</div>
+            <div className="flex items-center gap-2">
+              <div className={`text-sm ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>
+                Balance: {getTokenBalance(swapState.outputToken)}
+              </div>
             </div>
           </div>
         </div>

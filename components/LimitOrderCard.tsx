@@ -5,6 +5,7 @@ import TokenModal from './TokenModal';
 import { TOKENS } from '../constants';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useCardanoWallet } from '../contexts/CardanoWalletContext';
 import LoadingAnimation from './LoadingAnimation';
 
 interface LimitOrderCardProps {
@@ -18,6 +19,7 @@ interface LimitOrderCardProps {
 const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onConnect, onTokenChange, activeTab, setActiveTab }) => {
   const { theme } = useTheme();
   const { t } = useLanguage();
+  const { balance } = useCardanoWallet();
   const [swapState, setSwapState] = useState<SwapState>({
     inputToken: TOKENS[0], // ETH
     outputToken: TOKENS[1], // USDC
@@ -31,6 +33,39 @@ const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onCo
   const [isInputModalOpen, setIsInputModalOpen] = useState(false);
   const [isOutputModalOpen, setIsOutputModalOpen] = useState(false);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+
+  // Function to get token balance
+  const getTokenBalance = (token: Token) => {
+    if (!isWalletConnected) return '0';
+    
+    if (token.symbol === 'ADA') {
+      return balance;
+    }
+    
+    const mockBalances: { [symbol: string]: string } = {
+      'SNEK': '1,250,000',
+      'MIN': '850.50',
+      'SUNDAE': '2,450.00',
+      'AGIX': '125.8',
+      'INDY': '45.2',
+      'IAG': '320.5',
+      'NIGHT': '180.75',
+      'DJED': '500.00',
+      'SHEN': '1,200.0',
+      'WMT': '750.3',
+      'HOSKY': '50,000,000',
+      'MILK': '425.8',
+      'CLAY': '95.2',
+      'VYFI': '12.5',
+      'USDM': '800.00',
+      'C3': '2,150.0',
+      'IUSD': '650.50',
+      'LQ': '85.7',
+      'CLARITY': '15,000.0'
+    };
+    
+    return mockBalances[token.symbol] || '0';
+  };
 
   const handleInputTokenSelect = (token: Token) => {
     setSwapState(prev => ({ ...prev, inputToken: token }));
@@ -232,9 +267,31 @@ const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onCo
           ? 'bg-slate-800/50 hover:bg-slate-800/80 focus-within:border-slate-700' 
           : 'bg-gray-50 hover:bg-gray-100 focus-within:border-gray-300'
       }`}>
-        <div className={`text-xs font-medium mb-3 ${
-          theme === 'dark' ? 'text-slate-400' : 'text-gray-600'
-        }`}>{t('youSell')}</div>
+        <div className="flex justify-between items-center mb-3">
+          <div className={`text-xs font-medium ${
+            theme === 'dark' ? 'text-slate-400' : 'text-gray-600'
+          }`}>{t('youSell')}</div>
+          <div className="flex items-center gap-2">
+            <span className={`text-xs ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>
+              Balance: {getTokenBalance(swapState.inputToken)}
+            </span>
+            {isWalletConnected && (
+              <button
+                onClick={() => {
+                  const maxBalance = getTokenBalance(swapState.inputToken);
+                  setSwapState(prev => ({ ...prev, inputAmount: maxBalance.replace(/,/g, '') }));
+                }}
+                className={`text-xs px-2 py-1 rounded-lg transition-colors ${
+                  theme === 'dark' 
+                    ? 'bg-slate-700 hover:bg-slate-600 text-slate-300' 
+                    : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                }`}
+              >
+                MAX
+              </button>
+            )}
+          </div>
+        </div>
         
         <div className="flex justify-between items-center">
           <input
@@ -285,9 +342,14 @@ const LimitOrderCard: React.FC<LimitOrderCardProps> = ({ isWalletConnected, onCo
           ? 'bg-slate-800/50 hover:bg-slate-800/80 focus-within:border-slate-700' 
           : 'bg-gray-50 hover:bg-gray-100 focus-within:border-gray-300'
       }`}>
-        <div className={`text-xs font-medium mb-3 ${
-          theme === 'dark' ? 'text-slate-400' : 'text-gray-600'
-        }`}>{t('youBuy')}</div>
+        <div className="flex justify-between items-center mb-3">
+          <div className={`text-xs font-medium ${
+            theme === 'dark' ? 'text-slate-400' : 'text-gray-600'
+          }`}>{t('youBuy')}</div>
+          <span className={`text-xs ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>
+            Balance: {getTokenBalance(swapState.outputToken)}
+          </span>
+        </div>
         
         <div className="flex justify-between items-center">
           <input

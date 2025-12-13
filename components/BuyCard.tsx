@@ -5,6 +5,7 @@ import TokenModal from './TokenModal';
 import { TOKENS } from '../constants';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useCardanoWallet } from '../contexts/CardanoWalletContext';
 import LoadingAnimation from './LoadingAnimation';
 
 interface BuyCardProps {
@@ -18,12 +19,46 @@ interface BuyCardProps {
 const BuyCard: React.FC<BuyCardProps> = ({ isWalletConnected, onConnect, onTokenChange, activeTab, setActiveTab }) => {
   const { theme } = useTheme();
   const { t } = useLanguage();
+  const { balance } = useCardanoWallet();
   const [selectedToken, setSelectedToken] = useState<Token>(TOKENS[0]); // ETH
   const [fiatAmount, setFiatAmount] = useState('');
   const [tokenAmount, setTokenAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [isTokenModalOpen, setIsTokenModalOpen] = useState(false);
   const [isBuying, setIsBuying] = useState(false);
+
+  // Function to get token balance
+  const getTokenBalance = (token: Token) => {
+    if (!isWalletConnected) return '0';
+    
+    if (token.symbol === 'ADA') {
+      return balance;
+    }
+    
+    const mockBalances: { [symbol: string]: string } = {
+      'SNEK': '1,250,000',
+      'MIN': '850.50',
+      'SUNDAE': '2,450.00',
+      'AGIX': '125.8',
+      'INDY': '45.2',
+      'IAG': '320.5',
+      'NIGHT': '180.75',
+      'DJED': '500.00',
+      'SHEN': '1,200.0',
+      'WMT': '750.3',
+      'HOSKY': '50,000,000',
+      'MILK': '425.8',
+      'CLAY': '95.2',
+      'VYFI': '12.5',
+      'USDM': '800.00',
+      'C3': '2,150.0',
+      'IUSD': '650.50',
+      'LQ': '85.7',
+      'CLARITY': '15,000.0'
+    };
+    
+    return mockBalances[token.symbol] || '0';
+  };
 
   const handleTokenSelect = (token: Token) => {
     setSelectedToken(token);
@@ -156,9 +191,14 @@ const BuyCard: React.FC<BuyCardProps> = ({ isWalletConnected, onConnect, onToken
           <span className={`text-sm font-medium ${
             theme === 'dark' ? 'text-slate-400' : 'text-gray-600'
           }`}>You receive</span>
-          <span className={`text-xs ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>
-            Rate: ${selectedToken.price ? selectedToken.price.toFixed(2) : '0.00'}
-          </span>
+          <div className="flex flex-col items-end">
+            <span className={`text-xs ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>
+              Rate: ${selectedToken.price ? selectedToken.price.toFixed(2) : '0.00'}
+            </span>
+            <span className={`text-xs ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>
+              Balance: {getTokenBalance(selectedToken)}
+            </span>
+          </div>
         </div>
         
         <div className="flex justify-between items-center">
