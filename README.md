@@ -1,6 +1,6 @@
 # EternTS - Cardano DEX Trading Platform
 
-A modern, responsive Cardano DEX interface built with Next.js, TypeScript, Tailwind CSS, and MeshSDK for native Cardano wallet integration.
+A modern, responsive Cardano DEX interface built with Next.js, TypeScript, Tailwind CSS, and MeshSDK for native Cardano wallet integration
 
 ## Features
 
