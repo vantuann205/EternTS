@@ -35,35 +35,13 @@ const SwapCard: React.FC<SwapCardProps> = ({ isWalletConnected, onConnect, onTok
   const getTokenBalance = (token: Token) => {
     if (!isWalletConnected) return '0';
     
-    // For ADA (native Cardano token), use real balance
     if (token.symbol === 'ADA') {
       return balance;
     }
     
-    // For other tokens, simulate some balances
-    const mockBalances: { [symbol: string]: string } = {
-      'SNEK': '1,250,000',
-      'MIN': '850.50',
-      'SUNDAE': '2,450.00',
-      'AGIX': '125.8',
-      'INDY': '45.2',
-      'IAG': '320.5',
-      'NIGHT': '180.75',
-      'DJED': '500.00',
-      'SHEN': '1,200.0',
-      'WMT': '750.3',
-      'HOSKY': '50,000,000',
-      'MILK': '425.8',
-      'CLAY': '95.2',
-      'VYFI': '12.5',
-      'USDM': '800.00',
-      'C3': '2,150.0',
-      'IUSD': '650.50',
-      'LQ': '85.7',
-      'CLARITY': '15,000.0'
-    };
-    
-    return mockBalances[token.symbol] || '0';
+    // For other tokens, return 0 since we don't have real wallet data yet
+    // TODO: Implement real token balance fetching from wallet
+    return '0';
   };
   
   // Notify parent when input token changes (for chart)
@@ -178,9 +156,9 @@ const SwapCard: React.FC<SwapCardProps> = ({ isWalletConnected, onConnect, onTok
         </button>
       </div>
 
-      <div className="relative flex flex-col gap-1">
+      <div className="relative">
         {/* Input Section */}
-        <div className={`p-4 rounded-2xl transition-colors border border-transparent ${
+        <div className={`p-4 rounded-2xl transition-colors border border-transparent mb-1 mx-4 ${
           theme === 'dark' 
             ? 'bg-slate-800/50 hover:bg-slate-800/80 focus-within:border-slate-700' 
             : 'bg-gray-50 hover:bg-gray-100 focus-within:border-gray-300'
@@ -247,10 +225,18 @@ const SwapCard: React.FC<SwapCardProps> = ({ isWalletConnected, onConnect, onTok
               )}
             </div>
           </div>
+          
+          {/* Insufficient Balance Warning */}
+          {isWalletConnected && !!swapState.inputAmount && parseFloat(swapState.inputAmount) > parseFloat(getTokenBalance(swapState.inputToken).replace(/,/g, '')) && (
+            <div className="mt-2 text-sm text-red-500 flex items-center gap-1">
+              <span>⚠️</span>
+              <span>Insufficient {swapState.inputToken.symbol} balance</span>
+            </div>
+          )}
         </div>
 
         {/* Swap Arrow */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+        <div className="flex justify-center py-2 mb-1 mx-4">
           <button 
             onClick={handleSwapSides}
             className={`border-[4px] p-2 rounded-xl transition-all ${
@@ -264,7 +250,7 @@ const SwapCard: React.FC<SwapCardProps> = ({ isWalletConnected, onConnect, onTok
         </div>
 
         {/* Output Section */}
-        <div className={`p-4 rounded-2xl transition-colors border border-transparent ${
+        <div className={`p-4 rounded-2xl transition-colors border border-transparent mx-4 ${
           theme === 'dark' 
             ? 'bg-slate-800/50 hover:bg-slate-800/80 focus-within:border-slate-700' 
             : 'bg-gray-50 hover:bg-gray-100 focus-within:border-gray-300'
@@ -314,33 +300,35 @@ const SwapCard: React.FC<SwapCardProps> = ({ isWalletConnected, onConnect, onTok
         </div>
       </div>
 
-      <button 
-        onClick={() => {
-          if (isWalletConnected) {
-            setIsSwapping(true);
-            // Simulate swap transaction
-            setTimeout(() => setIsSwapping(false), 3000);
-          } else {
-            onConnect();
-          }
-        }}
-        disabled={isSwapping}
-        className={`w-full mt-2 font-semibold text-xl py-4 rounded-2xl transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed ${
-          theme === 'dark' 
-            ? 'bg-pink-500/10 text-pink-500 hover:bg-pink-500/20' 
-            : 'bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200'
-        }`}
-      >
-        {isSwapping ? (
-          <div className="flex items-center justify-center gap-2">
-            <LoadingAnimation size={24} message="" />
-            <span>Loading...</span>
-          </div>
-        ) : isWalletConnected ? 'Swap' : 'Connect Wallet'}
-      </button>
+      <div className="mx-4">
+        <button 
+          onClick={() => {
+            if (isWalletConnected) {
+              setIsSwapping(true);
+              // Simulate swap transaction
+              setTimeout(() => setIsSwapping(false), 3000);
+            } else {
+              onConnect();
+            }
+          }}
+          disabled={isSwapping || (isWalletConnected && !!swapState.inputAmount && parseFloat(swapState.inputAmount) > parseFloat(getTokenBalance(swapState.inputToken).replace(/,/g, '')))}
+          className={`w-full mt-2 font-semibold text-xl py-4 rounded-2xl transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed ${
+            theme === 'dark' 
+              ? 'bg-pink-500/10 text-pink-500 hover:bg-pink-500/20' 
+              : 'bg-pink-100 text-pink-700 hover:bg-pink-200 border border-pink-200'
+          }`}
+        >
+          {isSwapping ? (
+            <div className="flex items-center justify-center gap-2">
+              <LoadingAnimation size={24} message="" />
+              <span>Loading...</span>
+            </div>
+          ) : isWalletConnected ? 'Swap' : 'Connect Wallet'}
+        </button>
+      </div>
       
       {isWalletConnected && swapState.inputAmount && (
-         <div className={`mt-3 flex justify-between text-xs px-2 ${
+         <div className={`mt-3 mx-4 flex justify-between text-xs px-2 ${
            theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
          }`}>
             <span>Gas estimate</span>

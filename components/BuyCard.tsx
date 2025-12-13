@@ -35,29 +35,9 @@ const BuyCard: React.FC<BuyCardProps> = ({ isWalletConnected, onConnect, onToken
       return balance;
     }
     
-    const mockBalances: { [symbol: string]: string } = {
-      'SNEK': '1,250,000',
-      'MIN': '850.50',
-      'SUNDAE': '2,450.00',
-      'AGIX': '125.8',
-      'INDY': '45.2',
-      'IAG': '320.5',
-      'NIGHT': '180.75',
-      'DJED': '500.00',
-      'SHEN': '1,200.0',
-      'WMT': '750.3',
-      'HOSKY': '50,000,000',
-      'MILK': '425.8',
-      'CLAY': '95.2',
-      'VYFI': '12.5',
-      'USDM': '800.00',
-      'C3': '2,150.0',
-      'IUSD': '650.50',
-      'LQ': '85.7',
-      'CLARITY': '15,000.0'
-    };
-    
-    return mockBalances[token.symbol] || '0';
+    // For other tokens, return 0 since we don't have real wallet data yet
+    // TODO: Implement real token balance fetching from wallet
+    return '0';
   };
 
   const handleTokenSelect = (token: Token) => {
@@ -266,6 +246,41 @@ const BuyCard: React.FC<BuyCardProps> = ({ isWalletConnected, onConnect, onToken
         </div>
       </div>
 
+      {/* Transaction Summary */}
+      {isWalletConnected && (
+        <div className={`mb-4 p-3 rounded-xl mx-4 ${
+          theme === 'dark' 
+            ? 'bg-slate-800/50 border border-slate-700/50' 
+            : 'bg-gray-50 border border-gray-200'
+        }`}>
+          <div className="flex justify-between text-sm mb-1">
+            <span className={theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}>
+              Subtotal
+            </span>
+            <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
+              ${fiatAmount || '0.00'}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm mb-1">
+            <span className={theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}>
+              Fee ({paymentMethods.find(m => m.id === paymentMethod)?.fee})
+            </span>
+            <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
+              ${fiatAmount ? (parseFloat(fiatAmount) * (paymentMethod === 'card' ? 0.025 : 0.005)).toFixed(2) : '0.00'}
+            </span>
+          </div>
+          <hr className={`my-2 ${theme === 'dark' ? 'border-slate-700' : 'border-gray-200'}`} />
+          <div className="flex justify-between text-sm font-medium">
+            <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
+              Total
+            </span>
+            <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
+              ${fiatAmount ? (parseFloat(fiatAmount) * (1 + (paymentMethod === 'card' ? 0.025 : 0.005))).toFixed(2) : '0.00'}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Buy Button */}
       <div className="mx-4">
         <button 
@@ -293,40 +308,6 @@ const BuyCard: React.FC<BuyCardProps> = ({ isWalletConnected, onConnect, onToken
           ) : isWalletConnected ? `Buy ${selectedToken.symbol}` : 'Connect Wallet'}
         </button>
       </div>
-      
-      {fiatAmount && parseFloat(fiatAmount) > 0 && (
-        <div className={`mt-4 p-3 rounded-xl mx-4 ${
-          theme === 'dark' 
-            ? 'bg-slate-800/50 border border-slate-700/50' 
-            : 'bg-gray-50 border border-gray-200'
-        }`}>
-          <div className="flex justify-between text-sm mb-1">
-            <span className={theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}>
-              Subtotal
-            </span>
-            <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
-              ${fiatAmount}
-            </span>
-          </div>
-          <div className="flex justify-between text-sm mb-1">
-            <span className={theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}>
-              Fee ({paymentMethods.find(m => m.id === paymentMethod)?.fee})
-            </span>
-            <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
-              ${(parseFloat(fiatAmount) * (paymentMethod === 'card' ? 0.025 : 0.005)).toFixed(2)}
-            </span>
-          </div>
-          <hr className={`my-2 ${theme === 'dark' ? 'border-slate-700' : 'border-gray-200'}`} />
-          <div className="flex justify-between text-sm font-medium">
-            <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
-              Total
-            </span>
-            <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
-              ${(parseFloat(fiatAmount) * (1 + (paymentMethod === 'card' ? 0.025 : 0.005))).toFixed(2)}
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* Token Modal */}
       <TokenModal

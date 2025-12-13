@@ -35,29 +35,9 @@ const SellCard: React.FC<SellCardProps> = ({ isWalletConnected, onConnect, onTok
       return balance;
     }
     
-    const mockBalances: { [symbol: string]: string } = {
-      'SNEK': '1,250,000',
-      'MIN': '850.50',
-      'SUNDAE': '2,450.00',
-      'AGIX': '125.8',
-      'INDY': '45.2',
-      'IAG': '320.5',
-      'NIGHT': '180.75',
-      'DJED': '500.00',
-      'SHEN': '1,200.0',
-      'WMT': '750.3',
-      'HOSKY': '50,000,000',
-      'MILK': '425.8',
-      'CLAY': '95.2',
-      'VYFI': '12.5',
-      'USDM': '800.00',
-      'C3': '2,150.0',
-      'IUSD': '650.50',
-      'LQ': '85.7',
-      'CLARITY': '15,000.0'
-    };
-    
-    return mockBalances[token.symbol] || '0';
+    // For other tokens, return 0 since we don't have real wallet data yet
+    // TODO: Implement real token balance fetching from wallet
+    return '0';
   };
 
   const handleTokenSelect = (token: Token) => {
@@ -193,6 +173,14 @@ const SellCard: React.FC<SellCardProps> = ({ isWalletConnected, onConnect, onTok
         <div className={`text-sm mt-2 ${theme === 'dark' ? 'text-slate-500' : 'text-gray-500'}`}>
           Rate: ${selectedToken.price ? selectedToken.price.toFixed(2) : '0.00'} per {selectedToken.symbol}
         </div>
+        
+        {/* Insufficient Balance Warning */}
+        {isWalletConnected && tokenAmount && parseFloat(tokenAmount) > parseFloat(getTokenBalance(selectedToken).replace(/,/g, '')) && (
+          <div className="mt-2 text-sm text-red-500 flex items-center gap-1">
+            <span>⚠️</span>
+            <span>Insufficient {selectedToken.symbol} balance</span>
+          </div>
+        )}
       </div>
 
       {/* Fiat Amount */}
@@ -270,6 +258,41 @@ const SellCard: React.FC<SellCardProps> = ({ isWalletConnected, onConnect, onTok
         </div>
       </div>
 
+      {/* Transaction Summary */}
+      {isWalletConnected && (
+        <div className={`mb-4 p-3 rounded-xl mx-4 ${
+          theme === 'dark' 
+            ? 'bg-slate-800/50 border border-slate-700/50' 
+            : 'bg-gray-50 border border-gray-200'
+        }`}>
+          <div className="flex justify-between text-sm mb-1">
+            <span className={theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}>
+              Gross amount
+            </span>
+            <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
+              ${fiatAmount || '0.00'}
+            </span>
+          </div>
+          <div className="flex justify-between text-sm mb-1">
+            <span className={theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}>
+              Fee ({withdrawMethods.find(m => m.id === withdrawMethod)?.fee})
+            </span>
+            <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
+              -${fiatAmount ? (parseFloat(fiatAmount) * (withdrawMethod === 'bank' ? 0.005 : 0.02)).toFixed(2) : '0.00'}
+            </span>
+          </div>
+          <hr className={`my-2 ${theme === 'dark' ? 'border-slate-700' : 'border-gray-200'}`} />
+          <div className="flex justify-between text-sm font-medium">
+            <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
+              Net amount
+            </span>
+            <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
+              ${fiatAmount ? (parseFloat(fiatAmount) * (1 - (withdrawMethod === 'bank' ? 0.005 : 0.02))).toFixed(2) : '0.00'}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Sell Button */}
       <div className="mx-4">
         <button 
@@ -282,7 +305,7 @@ const SellCard: React.FC<SellCardProps> = ({ isWalletConnected, onConnect, onTok
               onConnect();
             }
           }}
-          disabled={!tokenAmount || parseFloat(tokenAmount) <= 0 || isSelling}
+          disabled={!tokenAmount || parseFloat(tokenAmount) <= 0 || isSelling || (isWalletConnected && tokenAmount && parseFloat(tokenAmount) > parseFloat(getTokenBalance(selectedToken).replace(/,/g, '')))}
           className={`w-full mt-2 font-semibold text-xl py-4 rounded-2xl transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed ${
           theme === 'dark' 
             ? 'bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20' 
@@ -297,40 +320,6 @@ const SellCard: React.FC<SellCardProps> = ({ isWalletConnected, onConnect, onTok
           ) : isWalletConnected ? `Sell ${selectedToken.symbol}` : 'Connect Wallet'}
         </button>
       </div>
-      
-      {tokenAmount && parseFloat(tokenAmount) > 0 && (
-        <div className={`mt-4 p-3 rounded-xl mx-4 ${
-          theme === 'dark' 
-            ? 'bg-slate-800/50 border border-slate-700/50' 
-            : 'bg-gray-50 border border-gray-200'
-        }`}>
-          <div className="flex justify-between text-sm mb-1">
-            <span className={theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}>
-              Gross amount
-            </span>
-            <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
-              ${fiatAmount}
-            </span>
-          </div>
-          <div className="flex justify-between text-sm mb-1">
-            <span className={theme === 'dark' ? 'text-slate-400' : 'text-gray-600'}>
-              Fee ({withdrawMethods.find(m => m.id === withdrawMethod)?.fee})
-            </span>
-            <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
-              -${(parseFloat(fiatAmount || '0') * (withdrawMethod === 'bank' ? 0.005 : 0.02)).toFixed(2)}
-            </span>
-          </div>
-          <hr className={`my-2 ${theme === 'dark' ? 'border-slate-700' : 'border-gray-200'}`} />
-          <div className="flex justify-between text-sm font-medium">
-            <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
-              Net amount
-            </span>
-            <span className={theme === 'dark' ? 'text-white' : 'text-gray-900'}>
-              ${(parseFloat(fiatAmount || '0') * (1 - (withdrawMethod === 'bank' ? 0.005 : 0.02))).toFixed(2)}
-            </span>
-          </div>
-        </div>
-      )}
 
       {/* Token Modal */}
       <TokenModal
