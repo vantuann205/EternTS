@@ -15,6 +15,7 @@ interface WalletModalProps {
   onSelectWallet: (walletName: string) => void;
   availableWallets: WalletOption[];
   connecting: boolean;
+  retryCount?: number;
 }
 
 const WalletModal: React.FC<WalletModalProps> = ({ 
@@ -22,7 +23,8 @@ const WalletModal: React.FC<WalletModalProps> = ({
   onClose, 
   onSelectWallet, 
   availableWallets,
-  connecting 
+  connecting,
+  retryCount = 0
 }) => {
   const { theme } = useTheme();
 
@@ -58,16 +60,20 @@ const WalletModal: React.FC<WalletModalProps> = ({
         <div className="space-y-3">
           {connecting ? (
             <div className="py-8">
-              <LoadingAnimation size={80} message="Loading..." />
+              <LoadingAnimation size={80} message="" />
               <p className={`text-center text-sm mt-4 ${
                 theme === 'dark' ? 'text-slate-400' : 'text-gray-600'
               }`}>
-                Connecting to wallet...
+                {retryCount === 0 ? 'Connecting to wallet...' : 
+                 retryCount === 1 ? 'Retrying connection... (1/2)' :
+                 'Final attempt... (2/2)'}
               </p>
               <p className={`text-center text-xs mt-2 ${
                 theme === 'dark' ? 'text-slate-500' : 'text-gray-500'
               }`}>
-                If connection fails, we&apos;ll automatically retry once
+                {retryCount === 0 ? 'Auto-retry if connection fails' :
+                 retryCount < 2 ? 'Please wait, trying again...' :
+                 'Last attempt, please wait...'}
               </p>
             </div>
           ) : availableWallets.length === 0 ? (

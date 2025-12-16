@@ -22,6 +22,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, showContent = 
     balance, 
     showWalletModal,
     availableWallets,
+    retryCount,
     connectWallet, 
     selectWallet,
     disconnectWallet, 
@@ -389,6 +390,7 @@ const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab, showContent = 
         onSelectWallet={selectWallet}
         availableWallets={availableWallets}
         connecting={connecting}
+        retryCount={retryCount}
       />
     </header>
   );

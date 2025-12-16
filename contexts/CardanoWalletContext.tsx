@@ -20,8 +20,9 @@ interface CardanoWalletContextType {
   availableWallets: WalletOption[];
   showErrorModal: boolean;
   errorMessage: string;
+  retryCount: number;
   connectWallet: () => void;
-  selectWallet: (walletName: string) => Promise<void>;
+  selectWallet: (walletName: string, attemptNumber?: number) => Promise<void>;
   disconnectWallet: () => void;
   copyAddress: () => void;
   closeWalletModal: () => void;
@@ -88,9 +89,14 @@ export const CardanoWalletProvider: React.FC<CardanoWalletProviderProps> = ({ ch
     }
   };
 
-  const selectWallet = async (walletName: string, isRetry: boolean = false) => {
+  const selectWallet = async (walletName: string, attemptNumber: number = 1) => {
     try {
       setConnecting(true);
+      
+      // Add small delay for smoother animation
+      if (attemptNumber > 1) {
+        await new Promise(resolve => setTimeout(resolve, 800));
+      }
       
       const browserWallet = await BrowserWallet.enable(walletName);
       setWallet(browserWallet);
@@ -123,34 +129,40 @@ export const CardanoWalletProvider: React.FC<CardanoWalletProviderProps> = ({ ch
         setBalance('0');
       }
       
+      // Add small delay before success to prevent jarring transition
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
       setConnected(true);
       setShowWalletModal(false);
       setRetryCount(0); // Reset retry count on success
       setConnecting(false); // Success - stop connecting
       
     } catch (error) {
-      console.error('Error connecting wallet:', error);
+      console.error(`Error connecting wallet (attempt ${attemptNumber}):`, error);
       
-      // If this is the first attempt, try again
-      if (!isRetry && retryCount === 0) {
-        console.log('First attempt failed, retrying...');
-        setRetryCount(1);
-        // Don't set connecting to false here, keep loading during retry
+      // Auto-retry up to 3 attempts total (initial + 2 retries)
+      if (attemptNumber < 3) {
+        console.log(`Attempt ${attemptNumber} failed, retrying... (${3 - attemptNumber} attempts left)`);
+        setRetryCount(attemptNumber);
+        // Keep loading state and retry after delay
         setTimeout(() => {
-          selectWallet(walletName, true);
-        }, 1500);
+          selectWallet(walletName, attemptNumber + 1);
+        }, 1200);
         return;
       }
       
-      // If retry also failed, show error modal
+      // All attempts failed, show error modal
+      await new Promise(resolve => setTimeout(resolve, 200)); // Small delay for smooth transition
       setConnecting(false);
       setShowWalletModal(false);
       setRetryCount(0);
       setErrorMessage(
-        `Failed to connect to ${walletDisplayNames[walletName] || walletName}. Please make sure:\n\n` +
+        `Failed to connect to ${walletDisplayNames[walletName] || walletName} after 3 attempts.\n\n` +
+        `Please make sure:\n` +
         `• Your wallet extension is installed and unlocked\n` +
         `• You have granted permission to connect\n` +
-        `• Try refreshing the page and connecting again`
+        `• Try refreshing the page and connecting again\n\n` +
+        `If the problem persists, try restarting your browser.`
       );
       setShowErrorModal(true);
     }
@@ -199,6 +211,7 @@ export const CardanoWalletProvider: React.FC<CardanoWalletProviderProps> = ({ ch
     availableWallets,
     showErrorModal,
     errorMessage,
+    retryCount,
     connectWallet,
     selectWallet,
     disconnectWallet,
